@@ -38,14 +38,56 @@ function render(){profileRender();let b=$("v5TableBody");b.innerHTML=rows.map((r
 function clamp(i,v){const r=rows[i];return Math.max(r.min,Math.min(r.max,Math.round(Number(v)||0)))}
 function bindTable(){document.querySelectorAll("#v5TableBody button[data-act]").forEach(b=>b.onclick=()=>{let i=+b.dataset.i;rows[i].q=clamp(i,rows[i].q+(b.dataset.act==="plus"?1:-1));render()});document.querySelectorAll(".v5-q").forEach(x=>x.onchange=()=>{let i=+x.dataset.i;rows[i].q=clamp(i,x.value);render()});document.querySelectorAll(".v5-min").forEach(x=>x.onchange=()=>{let i=+x.dataset.i;rows[i].min=Math.max(0,Math.round(+x.value||0));if(rows[i].max<rows[i].min)rows[i].max=rows[i].min;rows[i].q=clamp(i,rows[i].q);render()});document.querySelectorAll(".v5-max").forEach(x=>x.onchange=()=>{let i=+x.dataset.i;rows[i].max=Math.max(rows[i].min,Math.round(+x.value||0));rows[i].q=clamp(i,rows[i].q);render()})}
 function stateTotals(qs){return totals(qs)}
+function flashOptimizedRows(previousQs,newQs){
+ const changed=[];
+ newQs.forEach((q,i)=>{if(previousQs[i]!==q)changed.push(i)});
+ requestAnimationFrame(()=>{
+   changed.forEach(i=>{
+     const tr=document.querySelector(`#v5TableBody tr[data-i="${i}"]`);
+     if(tr){tr.classList.remove("v51-row-changed");void tr.offsetWidth;tr.classList.add("v51-row-changed")}
+   });
+   const table=document.querySelector(".v5-table-card");
+   if(table){table.classList.remove("v51-table-updated");void table.offsetWidth;table.classList.add("v51-table-updated")}
+ });
+ setTimeout(()=>document.querySelectorAll(".v51-row-changed").forEach(el=>el.classList.remove("v51-row-changed")),1800);
+}
 function optimize(){const goal=profile.goal,cap=Math.max(goal+500,Math.round(goal*1.25));let states=new Map([[0,[{qs:[],p:0,f:0,c:0,cho:0,q:0}]]]);rows.forEach((r,idx)=>{let next=new Map();for(const [energy,list] of states){for(const st of list){for(let q=r.min;q<=r.max;q++){let ne=energy+q*r.k;if(ne>cap&&r.k>0)continue;let ns={qs:st.qs.concat(q),p:st.p+q*r.p,f:st.f+q*r.f,c:st.c+q*r.c,cho:st.cho+q*r.cho,q:st.q+q};let arr=next.get(ne)||[];arr.push(ns);if(arr.length>12){arr.sort((a,b)=>{let ta={k:ne,p:a.p,f:a.f,c:a.c},tb={k:ne,p:b.p,f:b.f,c:b.c};return macroPenalty(ta)-macroPenalty(tb)||a.q-b.q});arr.length=12}next.set(ne,arr)}}}states=next});
  let all=[];for(const [k,list] of states)for(const s of list)all.push({k,...s});if(!all.length)return;const minDiff=Math.min(...all.map(x=>Math.abs(x.k-goal)));const near=all.filter(x=>Math.abs(x.k-goal)<=minDiff+60);let chosen=[];function add(x,label){if(!x)return;if(chosen.some(y=>y.qs.join(",")===x.qs.join(",")))return;chosen.push({...x,label})}
  add([...all].sort((a,b)=>Math.abs(a.k-goal)-Math.abs(b.k-goal)||macroPenalty(a)-macroPenalty(b)||a.q-b.q)[0],"Más cercana");
  add([...near].sort((a,b)=>macroPenalty(a)-macroPenalty(b)||Math.abs(a.k-goal)-Math.abs(b.k-goal)||a.q-b.q)[0],"Más equilibrada");
  add([...near].sort((a,b)=>a.q-b.q||Math.abs(a.k-goal)-Math.abs(b.k-goal)||macroPenalty(a)-macroPenalty(b))[0],"Menos equivalentes");
  for(const x of [...all].sort((a,b)=>Math.abs(a.k-goal)-Math.abs(b.k-goal)||macroPenalty(a)-macroPenalty(b))){add(x,"Alternativa similar");if(chosen.length>=4)break}
- renderAlternatives(chosen.slice(0,4));}
-function renderAlternatives(list){$("v5Alternatives").innerHTML=list.map((x,i)=>{let d=x.k-profile.goal;return `<div class="v5-alt"><div><strong>${i+1}. ${x.label}</strong><small>${fmt(x.k)} kcal (${d>0?"+":""}${fmt(d)}) · P ${fmt(x.p)} g · L ${fmt(x.f)} g · HC ${fmt(x.c)} g · ${x.q} equivalentes</small></div><button data-alt="${i}">Aplicar</button></div>`}).join("");window.__v5alts=list;document.querySelectorAll("[data-alt]").forEach(b=>b.onclick=()=>{let x=window.__v5alts[+b.dataset.alt];x.qs.forEach((q,i)=>rows[i].q=q);render()})}
+ chosen=chosen.slice(0,4);
+ const best=chosen[0];
+ const previousQs=rows.map(r=>r.q);
+ if(best){
+   best.qs.forEach((q,i)=>rows[i].q=q);
+   render();
+   flashOptimizedRows(previousQs,best.qs);
+ }
+ renderAlternatives(chosen,true);
+}
+function renderAlternatives(list,autoApplied=false){
+ $("v5Alternatives").innerHTML=list.map((x,i)=>{
+   let d=x.k-profile.goal;
+   const applied=autoApplied&&i===0;
+   return `<div class="v5-alt ${applied?"v51-alt-applied":""}">
+     <div><strong>${i+1}. ${x.label}${applied?' <span class="v51-applied-badge">Aplicada automáticamente</span>':''}</strong>
+     <small>${fmt(x.k)} kcal (${d>0?"+":""}${fmt(d)}) · P ${fmt(x.p)} g · L ${fmt(x.f)} g · HC ${fmt(x.c)} g · ${x.q} equivalentes</small></div>
+     <button data-alt="${i}">${applied?"Aplicada":"Aplicar"}</button>
+   </div>`}).join("");
+ window.__v5alts=list;
+ document.querySelectorAll("[data-alt]").forEach(b=>b.onclick=()=>{
+   let x=window.__v5alts[+b.dataset.alt];
+   const previousQs=rows.map(r=>r.q);
+   x.qs.forEach((q,i)=>rows[i].q=q);
+   render();
+   flashOptimizedRows(previousQs,x.qs);
+   renderAlternatives(window.__v5alts,false);
+   const card=b.closest(".v5-alt");
+   if(card){card.classList.add("v51-alt-applied");b.textContent="Aplicada";}
+ });
+}
 function openProfile(){ $("v5ProfileName").value=profile.name;$("v5ProfileSex").value=profile.sex;$("v5ProfileAge").value=profile.age;$("v5ProfileGoal").value=profile.goal;$("v5TargetProtein").value=profile.macro.p;$("v5TargetFat").value=profile.macro.f;$("v5TargetCarbs").value=profile.macro.c;$("v5ProfileModal").hidden=false}
 function closeProfile(){$("v5ProfileModal").hidden=true}
 $("v5EditProfile").onclick=openProfile;$("v5ProfileClose").onclick=closeProfile;document.querySelectorAll("[data-close-v5-profile]").forEach(x=>x.onclick=closeProfile);$("v5SaveProfile").onclick=()=>{let p=+$("v5TargetProtein").value,f=+$("v5TargetFat").value,c=+$("v5TargetCarbs").value,sum=p+f+c;if(Math.abs(sum-100)>0.01){$("v5ProfileWarning").hidden=false;$("v5ProfileWarning").textContent=`Los porcentajes de macronutrimentos deben sumar 100%. Actualmente suman ${sum}%.`;return}$("v5ProfileWarning").hidden=true;profile={...profile,name:$("v5ProfileName").value.trim()||"General",sex:$("v5ProfileSex").value,age:Math.round(+$("v5ProfileAge").value||50),goal:Math.round(+$("v5ProfileGoal").value||1800),macro:{p,f,c}};localStorage.setItem("miniSmaeV5Profile",JSON.stringify(profile));closeProfile();render();$("v5Alternatives").innerHTML='<p class="muted">El perfil cambió. Ejecuta nuevamente la optimización.</p>'};

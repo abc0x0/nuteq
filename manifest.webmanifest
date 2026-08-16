@@ -1,7 +1,7 @@
 {
-  "name": "Mini SMAE v5",
-  "short_name": "Mini SMAE v5",
-  "description": "Mini SMAE v5: consulta de equivalentes, tabla base personalizada y optimización local.",
+  "name": "Mini SMAE v5.1",
+  "short_name": "Mini SMAE v5.1",
+  "description": "Mini SMAE v5.1: consulta de equivalentes, tabla base personalizada y optimización local.",
   "lang": "es-MX",
   "start_url": "./index.html",
   "scope": "./",

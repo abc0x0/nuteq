@@ -1,4 +1,4 @@
-const CACHE_NAME = "mini-smae-v5-pwa-v1";
+const CACHE_NAME = "mini-smae-v5-1-pwa-v1";
 
 const APP_SHELL = [
   "./",

@@ -105,3 +105,13 @@ Reglas implementadas:
 - hasta cuatro alternativas de solución;
 - iconografía por grupos y nuevo ícono de intercambio manzana ↔ pera;
 - base de alimentos: JSON validado de la 4.ª edición, v7.
+
+
+## Mini SMAE v5.1
+
+Cambios respecto a v5:
+
+- «Optimizar automáticamente» aplica de inmediato la alternativa «Más cercana».
+- Las demás alternativas continúan disponibles y pueden aplicarse manualmente.
+- Las filas cuyas cantidades cambian reciben una animación temporal para confirmar visualmente la actualización.
+- La columna «Cantidad» se resalta permanentemente en azul claro para facilitar su lectura.
