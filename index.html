@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Mini SMAE v4.1 PWA — Comidas y trazabilidad</title>
+  <title>Mini SMAE v5 — Tabla base personalizada</title>
   <meta name="description" content="Consulta local del SMAE: fichas, sustitutos, grupos, comparación, equivalentes y asistente de sustitución por reglas.">
   <link rel="stylesheet" href="style.css">
   <meta name="theme-color" content="#2d6b40">
@@ -14,7 +14,7 @@
 <header class="topbar">
   <div class="brand">
     <span class="brand-icon">🥗</span>
-    <div><h1>Mini SMAE <small>v4</small></h1><p>Consulta, equivalentes, comidas y trazabilidad local</p></div>
+    <div><h1>Mini SMAE <small>v5</small></h1><p>Equivalentes, tabla base, comidas y trazabilidad local</p></div>
   </div>
   <div class="v4-top-actions">
       <button id="validationBtn" class="v4-top-btn" type="button">ⓘ Correcciones y validación</button>
@@ -28,6 +28,7 @@
   <button class="tab" data-view="comparar">⚖️ Comparar</button>
   <button class="tab" data-view="equivalentes">🧮 Equivalentes</button>
   <button class="tab" data-view="asistente">💬 Asistente</button>
+  <button class="tab" data-view="tabla">🧩 Tabla base</button>
   <button class="tab" data-view="comida">🥗 Mi comida</button>
   <button class="tab" data-view="favoritos">⭐ Favoritos</button>
   <button class="tab" data-view="estudiante">🎓 Estudiante</button>
@@ -128,6 +129,52 @@
     </div>
   </section>
 
+
+  <section id="view-tabla" class="view">
+    <div class="section-head v5-section-head">
+      <div>
+        <p class="eyebrow">Planificación por equivalentes</p>
+        <h2>🧩 Tabla base personalizada</h2>
+        <p class="muted">Ajusta cantidades enteras por grupo para acercarte a un objetivo energético. En modo automático, Mini SMAE propone hasta cuatro combinaciones y prioriza: energía → macronutrimentos → menor número de equivalentes.</p>
+      </div>
+    </div>
+
+    <div class="v5-profile-grid">
+      <article class="card v5-profile-card">
+        <div class="card-head"><div><p class="eyebrow">Perfil objetivo</p><h2 id="v5ProfileTitle">👤 General</h2></div><button id="v5EditProfile" class="v4-top-btn" type="button">⚙️ Editar perfil</button></div>
+        <div class="v5-profile-fields">
+          <div><span class="lab">Sexo</span><strong id="v5Sex">Hombre</strong></div>
+          <div><span class="lab">Edad</span><strong><span id="v5Age">50</span> años</strong></div>
+          <div><span class="lab">Condición</span><strong id="v5Condition">Sin condición clínica</strong></div>
+          <div><span class="lab">Objetivo</span><strong><span id="v5Goal">1800</span> kcal</strong></div>
+        </div>
+        <p class="muted v5-small-note">Perfil general editable. No constituye una prescripción nutricional individual.</p>
+      </article>
+      <aside class="card v5-summary-card">
+        <p class="eyebrow">Resumen actual</p>
+        <div class="v5-energy-number"><strong id="v5TotalKcal">0</strong><span> / <span id="v5Goal2">1800</span> kcal</span></div>
+        <div class="v5-progress"><span id="v5ProgressBar"></span></div>
+        <div class="v5-diff" id="v5Diff">—</div>
+        <div class="v5-macro-mini"><span>Proteína <b id="v5Protein">0 g</b></span><span>Lípidos <b id="v5Fat">0 g</b></span><span>Hidratos <b id="v5Carbs">0 g</b></span><span>Conteo HC <b id="v5Cho">0</b></span></div>
+      </aside>
+    </div>
+
+    <article class="card v5-table-card">
+      <div class="card-head v5-table-head"><div><p class="eyebrow">Modo manual</p><h2>Aporte nutrimental promedio</h2></div><div class="v5-actions"><button id="v5Reset" class="secondary v5-action-btn" type="button">↺ Reiniciar</button><button id="v5Optimize" class="primary v5-action-btn" type="button">✨ Optimizar automáticamente</button></div></div>
+      <div class="v5-table-wrap">
+        <table class="v5-table">
+          <thead><tr><th>Grupo</th><th>Subgrupo</th><th>Mín</th><th>Máx</th><th>Cantidad</th><th>Energía</th><th>Proteína</th><th>Lípidos</th><th>Hidratos</th><th>Conteo HC</th></tr></thead>
+          <tbody id="v5TableBody"></tbody>
+          <tfoot id="v5TableFoot"></tfoot>
+        </table>
+      </div>
+    </article>
+
+    <div class="v5-bottom-grid">
+      <article class="card"><p class="eyebrow">Optimización jerárquica</p><h2>Alternativas sugeridas</h2><div id="v5Alternatives" class="v5-alternatives"><p class="muted">Pulsa “Optimizar automáticamente” para generar alternativas.</p></div></article>
+      <article class="card"><p class="eyebrow">Criterio general</p><h2>Distribución objetivo editable</h2><div id="v5MacroTarget" class="v5-targets"></div><p class="muted v5-small-note">La energía tiene prioridad. Los objetivos de macronutrimentos sólo se utilizan como criterio secundario para ordenar soluciones cercanas.</p></article>
+    </div>
+  </section>
 
   <section id="view-comida" class="view">
     <div class="section-head">
@@ -232,6 +279,25 @@
 
 </main>
 
+
+<div id="v5ProfileModal" class="v4-modal" hidden>
+  <div class="v4-modal-backdrop" data-close-v5-profile></div>
+  <section class="v4-modal-panel v4-sub-modal" role="dialog" aria-modal="true">
+    <div class="v4-modal-head"><div><p class="eyebrow">Perfil objetivo</p><h2>Editar perfil General</h2></div><button id="v5ProfileClose" class="v4-modal-close" type="button">×</button></div>
+    <div class="v5-profile-editor">
+      <label>Nombre del perfil<input id="v5ProfileName" value="General"></label>
+      <label>Sexo<select id="v5ProfileSex"><option>Hombre</option><option>Mujer</option><option>Otro / no especificado</option></select></label>
+      <label>Edad<input id="v5ProfileAge" type="number" min="18" max="120" value="50"></label>
+      <label>Energía objetivo (kcal)<input id="v5ProfileGoal" type="number" min="800" max="5000" step="10" value="1800"></label>
+      <label>Proteína (% energía)<input id="v5TargetProtein" type="number" min="10" max="35" value="20"></label>
+      <label>Lípidos (% energía)<input id="v5TargetFat" type="number" min="20" max="40" value="30"></label>
+      <label>Hidratos (% energía)<input id="v5TargetCarbs" type="number" min="40" max="65" value="50"></label>
+    </div>
+    <div id="v5ProfileWarning" class="notice" hidden></div>
+    <button id="v5SaveProfile" class="primary" type="button">Guardar perfil</button>
+  </section>
+</div>
+
 <div id="validationModal" class="v4-modal" hidden>
   <div class="v4-modal-backdrop" data-close-validation></div>
   <section class="v4-modal-panel" role="dialog" aria-modal="true" aria-labelledby="validationTitle">
@@ -267,12 +333,13 @@
 </div>
 
 
-<footer>Mini SMAE v4 · HTML + CSS + JavaScript + JSON + localStorage · Sin instalación.</footer>
+<footer>Mini SMAE v5 · HTML + CSS + JavaScript + JSON + localStorage · PWA local.</footer>
 
 <script src="data/smae-data.js"></script>
 <script src="app.js"></script>
 <script src="v3.js"></script>
 <script src="v4.js"></script>
+<script src="v5.js"></script>
 
 <script>
 if ("serviceWorker" in navigator && location.protocol !== "file:") {
@@ -283,12 +350,6 @@ if ("serviceWorker" in navigator && location.protocol !== "file:") {
 }
 </script>
 
-
-<a class="persistent-license-link" href="../LICENSE.md" target="_blank" rel="noopener" aria-label="Ver licencia y aviso legal">⚖ Licencia y aviso legal</a>
-<style>
-.persistent-license-link{position:fixed;right:14px;bottom:14px;z-index:9999;display:inline-flex;align-items:center;gap:6px;padding:8px 11px;border:1px solid #b9c8bc;border-radius:999px;background:rgba(255,255,255,.96);color:#2d6b40;text-decoration:none;font:700 12px/1.2 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;box-shadow:0 5px 18px rgba(29,57,37,.16);backdrop-filter:blur(6px)}
-.persistent-license-link:hover,.persistent-license-link:focus{background:#e8f3eb;outline:none}
-@media(max-width:520px){.persistent-license-link{right:9px;bottom:9px;padding:7px 9px;font-size:11px}}
-</style>
+<a class="legal-fixed" href="../LICENSE.md" target="_blank" rel="noopener">⚖ Licencia y aviso legal</a>
 </body>
 </html>

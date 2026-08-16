@@ -91,3 +91,17 @@ Se añadieron:
 
 Para que Android ofrezca la instalación como PWA, la carpeta debe publicarse mediante HTTPS.
 Una vez instalada y cargada inicialmente, puede funcionar sin conexión gracias al service worker.
+
+
+## Mini SMAE v5
+
+La versión 5 incorpora la **Tabla base personalizada** a partir de la tabla de aporte nutrimental promedio proporcionada para el proyecto.
+
+Reglas implementadas:
+- cantidades siempre enteras;
+- límites mínimos y máximos editables por grupo/subgrupo;
+- perfil General editable (sexo, edad, energía objetivo y distribución secundaria de macronutrimentos);
+- optimización jerárquica: primero cercanía energética, después cercanía a los objetivos de macronutrimentos y finalmente menor número de equivalentes;
+- hasta cuatro alternativas de solución;
+- iconografía por grupos y nuevo ícono de intercambio manzana ↔ pera;
+- base de alimentos: JSON validado de la 4.ª edición, v7.
