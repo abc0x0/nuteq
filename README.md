@@ -1,81 +1,54 @@
-# Mini SMAE
+# Mini SMAE v2
 
-Mini aplicación web estática para consultar un alimento del Sistema Mexicano de Alimentos Equivalentes (SMAE) y mostrar posibles sustitutos del mismo grupo o subgrupo.
+Aplicación web estática y local para consultar el SMAE v7 validado.
 
-## Funciones
+## Tecnología
+- HTML
+- CSS
+- JavaScript
+- JSON
 
-- Búsqueda local por nombre de alimento.
-- Sugerencias automáticas mientras se escribe.
-- Ficha nutrimental.
-- Lista de sustitutos del mismo `grupo_codigo`.
-- Identificación visual de valores estimados de la base v7.
-- Consulta de fuente, página y estado de validación.
-- Sin servidor de base de datos.
-- Sin compilación.
-- Sin dependencias externas.
+No requiere compilación, instalación, framework, backend ni servidor de base de datos.
 
-## Cómo ejecutar
+## Funciones v2
+1. Buscar un alimento y mostrar su ficha.
+2. Mostrar sustitutos del mismo `grupo_codigo`.
+3. Explorar alimentos por grupo/subgrupo.
+4. Comparar dos alimentos.
+5. Calcular cantidades para un número de equivalentes.
+6. Asistente de sustitución basado en reglas:
+   - similar en energía;
+   - menos energía;
+   - más fibra;
+   - menos sodio;
+   - más proteína.
+7. Mostrar avisos para valores estimados de la base v7.
 
-### Opción 1: abrir directamente
+## Ejecutar
+Abra `index.html` directamente con un navegador moderno.
 
-Abra `index.html` con un navegador moderno.
+La aplicación incluye `data/smae-data.js` como respaldo para poder funcionar mediante `file://`.
 
-La aplicación incluye `data/smae-data.js`, una copia de los datos necesarios empaquetada como JavaScript, para evitar las restricciones `file://` que algunos navegadores aplican al leer JSON mediante `fetch()`.
-
-### Opción 2: servidor web local sencillo
-
-Desde esta carpeta:
+Opcionalmente puede servirse localmente con:
 
 ```bash
 python3 -m http.server 8000
 ```
 
-Después abra:
+y abrir:
 
 ```text
 http://localhost:8000
 ```
 
-Cuando se ejecuta mediante HTTP, la aplicación intenta leer directamente:
-
-`data/SMAE-4ed-normalizado-validado-v7.json`
-
-## Archivos
-
-- `index.html` — interfaz.
-- `style.css` — estilos responsivos.
-- `app.js` — búsqueda, ficha y sustituciones.
-- `data/SMAE-4ed-normalizado-validado-v7.json` — base de datos validada v7.
-- `data/smae-data.js` — respaldo para ejecución directa sin servidor.
-- `README.md` — instrucciones.
-
 ## Regla de sustitución
+Los sustitutos se obtienen del mismo `grupo_codigo`, de modo que se respetan subgrupos como cereales con/sin grasa, AOA por aporte de grasa y tipos de leche.
 
-Se consideran candidatos de sustitución los alimentos con el mismo `grupo_codigo` que el alimento consultado. Esto respeta los subgrupos normalizados del SMAE, por ejemplo:
-
-- `cereales_sin_grasa`
-- `cereales_con_grasa`
-- `aoa_muy_bajo`
-- `aoa_bajo`
-- `aoa_moderado`
-- `aoa_alto`
-- `leche_descremada`
-- `leche_semidescremada`
-- `leche_entera`
-- `leche_con_azucar`
-
-Los candidatos se ordenan primero por cercanía de energía respecto al alimento seleccionado y después se muestran de forma interactiva.
+## Nota sobre equivalentes
+La calculadora supone que la cantidad sugerida del registro equivale a 1 equivalente SMAE. Multiplica esa cantidad por el número de equivalentes solicitado.
 
 ## Valores estimados
+Cuando `estado="estimado"`, la aplicación utiliza el valor operativo de la v7 y muestra una aclaración. El valor fuente permanece disponible en la ficha.
 
-Cuando un nutrimento tiene `estado: "estimado"`, la aplicación utiliza el valor operativo de la v7 y muestra un aviso. El usuario puede desplegar el detalle para consultar:
-
-- valor original;
-- valor estimado;
-- intervalo;
-- método;
-- motivo.
-
-## Nota
-
-Esta aplicación es una demostración didáctica y de consulta del SMAE. No sustituye la valoración ni la prescripción de un profesional de nutrición.
+## Uso
+Herramienta didáctica y de consulta. No sustituye valoración ni prescripción profesional.

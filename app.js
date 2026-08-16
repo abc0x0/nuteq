@@ -1,328 +1,51 @@
-(() => {
-  "use strict";
+(()=>{"use strict";
+const JSON_URL="data/SMAE-4ed-normalizado-validado-v7.json";
+let db=null,foods=[],current=null,subs=[],subLimit=10,compareA=null,compareB=null,eqFood=null,assistantFood=null;
+const $=id=>document.getElementById(id);
+const labels={energia:"Energía",proteina:"Proteína",lipidos:"Lípidos",hidratos_carbono:"Hidratos de carbono",fibra:"Fibra",peso_neto:"Peso neto",peso_bruto:"Peso bruto",indice_glicemico:"Índice glicémico",carga_glicemica:"Carga glicémica",sodio:"Sodio",potasio:"Potasio",calcio:"Calcio",hierro:"Hierro",hierro_no_hem:"Hierro no hem",selenio:"Selenio",colesterol:"Colesterol",vitamina_a:"Vitamina A",acido_ascorbico:"Ácido ascórbico",acido_folico:"Ácido fólico"};
+const norm=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
+const esc=s=>String(s??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+const fmt=v=>v==null||Number.isNaN(Number(v))?"ND":Number(v).toLocaleString("es-MX",{maximumFractionDigits:2});
+const nval=(f,k)=>f?.nutrimentos?.[k]?.valor??null;
+const est=o=>o?.estado==="estimado"||o?.correccion?.tipo==="estimacion_por_coherencia";
+function portion(f){let p=f?.porcion||{};let q=p.cantidad!=null?fmt(p.cantidad):(p.cantidad_fuente||"");return [q,p.unidad].filter(Boolean).join(" ")}
+function find(q,limit=12){q=norm(q);if(q.length<2)return[];let a=[],b=[];for(const f of foods){let n=f.nombre_busqueda||norm(f.nombre);(n.startsWith(q)?a:b).push(f)}return a.concat(b).filter(f=>(f.nombre_busqueda||norm(f.nombre)).includes(q)).slice(0,limit)}
+function bindSuggest(inputId,boxId,onPick){const input=$(inputId),box=$(boxId);input.addEventListener("input",()=>renderSuggest(find(input.value),box,onPick));input.addEventListener("keydown",e=>{if(e.key==="Enter"){let m=find(input.value,1);if(m.length)onPick(m[0])}if(e.key==="Escape")box.hidden=true});}
+function renderSuggest(matches,box,onPick){box.innerHTML="";if(!matches.length){box.hidden=true;return}for(const f of matches){let b=document.createElement("button");b.className="suggestion";b.innerHTML=`<span><strong>${esc(f.nombre)}</strong><br><small>${esc(portion(f))}</small></span><small>${esc(f.grupo)}</small>`;b.onclick=()=>{box.hidden=true;onPick(f)};box.appendChild(b)}box.hidden=false}
+async function load(){try{let r=await fetch(JSON_URL,{cache:"no-store"});if(!r.ok)throw 0;db=await r.json()}catch(e){db=window.SMAE_DATA}foods=db.alimentos||[];$("dataStatus").textContent=`Datos locales · ${foods.length.toLocaleString("es-MX")} alimentos`;$("dataStatus").classList.add("ready");populateGroups()}
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".view").forEach(x=>x.classList.remove("active"));b.classList.add("active");$("view-"+b.dataset.view).classList.add("active")});
+bindSuggest("foodSearch","suggestions",selectFood);
+function selectFood(f){current=f;$("foodSearch").value=f.nombre;$("searchEmpty").hidden=true;$("foodView").hidden=false;$("foodName").textContent=f.nombre;$("foodGroup").textContent=f.grupo;$("foodPortion").textContent="Porción sugerida: "+portion(f);renderEstimate(f);renderNutrients(f);renderSource(f);buildSubs(f)}
+function renderEstimate(f){let items=Object.entries(f.nutrimentos||{}).filter(([,o])=>est(o));$("estimatedBadge").hidden=!items.length;$("estimatedNotice").hidden=!items.length;if(!items.length)return;$("estimatedMessage").textContent=db.politica_uso_aplicacion?.mensaje_usuario_sugerido||"Se utiliza una estimación documentada.";$("estimateDetail").innerHTML=items.map(([k,o])=>{let c=o.correccion||{};return `<strong>${esc(labels[k]||k)}</strong><br>Fuente: ${esc(c.valor_original??o.valor_fuente)} ${esc(o.unidad||"")} · Usado: ${esc(c.valor_estimado??o.valor)} ${esc(o.unidad||"")}${c.intervalo_estimado?`<br>Intervalo: ${c.intervalo_estimado.join("–")} ${esc(o.unidad||"")}`:""}${c.metodo?`<br>Método: ${esc(c.metodo.replaceAll("_"," "))}`:""}`}).join("<hr>")}
+$("estimateToggle").onclick=()=>{let d=$("estimateDetail");d.hidden=!d.hidden;$("estimateToggle").textContent=d.hidden?"Ver detalle":"Ocultar detalle"};
+function renderNutrients(f){let grid=$("nutrientGrid");grid.innerHTML="";let pr=["energia","proteina","lipidos","hidratos_carbono","fibra","peso_neto","peso_bruto","indice_glicemico","carga_glicemica"];let ks=pr.concat(Object.keys(f.nutrimentos||{}).filter(k=>!pr.includes(k)));for(const k of ks){let o=f.nutrimentos?.[k];if(!o||o.valor==null)continue;let d=document.createElement("div");d.className="nutrient"+(est(o)?" est":"");d.innerHTML=`<div class="lab">${esc(labels[k]||k)}${est(o)?" · estimado":""}</div><div class="val">${fmt(o.valor)}${o.unidad?" "+esc(o.unidad):""}</div>`;grid.appendChild(d)}}
+function renderSource(f){let w=f.validacion_semantica?.advertencias||[];$("sourceInfo").innerHTML=`<dt>Documento</dt><dd>${esc(f.fuente?.documento||"SMAE")}</dd><dt>Página</dt><dd>${esc(f.fuente?.pagina_pdf??"ND")}</dd><dt>Estado</dt><dd>${esc(f.validacion_semantica?.estado||"sin advertencias")}</dd><dt>Advertencias</dt><dd>${w.length?esc(w.map(x=>x.codigo).join(", ")):"Ninguna"}</dd>`}
+function buildSubs(f){subs=foods.filter(x=>x.id!==f.id&&x.grupo_codigo===f.grupo_codigo).sort((a,b)=>{let t=nval(f,"energia"),ea=nval(a,"energia"),eb=nval(b,"energia");return t!=null&&ea!=null&&eb!=null?Math.abs(ea-t)-Math.abs(eb-t):a.nombre.localeCompare(b.nombre,"es")});subLimit=10;$("subCount").textContent=subs.length;$("subIntro").textContent=`Opciones del mismo grupo/subgrupo: ${f.grupo}.`;renderSubs()}
+function renderSubs(){let c=$("substitutes");c.innerHTML="";for(const f of subs.slice(0,subLimit)){let b=document.createElement("button");b.className="sub";b.innerHTML=`<strong>${esc(f.nombre)}</strong><small>${esc(portion(f))}</small><span class="kcal">${nval(f,"energia")==null?"ND":fmt(nval(f,"energia"))+" kcal"}${est(f.nutrimentos?.energia)?" *":""}</span>`;b.onclick=()=>selectFood(f);c.appendChild(b)}$("showMore").hidden=subLimit>=subs.length;$("showMore").textContent=`Ver más (${Math.max(0,subs.length-subLimit)})`}
+$("showMore").onclick=()=>{subLimit+=10;renderSubs()};
 
-  const JSON_URL = "data/SMAE-4ed-normalizado-validado-v7.json";
-  const INITIAL_SUBSTITUTE_LIMIT = 10;
+function populateGroups(){let map=new Map;for(const f of foods)if(!map.has(f.grupo_codigo))map.set(f.grupo_codigo,f.grupo);let s=$("groupSelect");[...map.entries()].sort((a,b)=>a[1].localeCompare(b[1],"es")).forEach(([code,name])=>{let o=document.createElement("option");o.value=code;o.textContent=name;s.appendChild(o)})}
+function renderGroup(){let code=$("groupSelect").value,q=norm($("groupFilter").value);let list=foods.filter(f=>!code||f.grupo_codigo===code).filter(f=>!q||norm(f.nombre).includes(q));$("groupSummary").hidden=!code;$("groupSummary").textContent=code?`${list.length.toLocaleString("es-MX")} alimentos en ${$("groupSelect").selectedOptions[0].textContent}.`:"";let c=$("groupFoods");c.innerHTML="";for(const f of list.slice(0,120)){let b=document.createElement("button");b.className="food-mini";b.innerHTML=`<strong>${esc(f.nombre)}</strong><small>${esc(portion(f))} · ${nval(f,"energia")!=null?fmt(nval(f,"energia"))+" kcal":"energía ND"}</small>`;b.onclick=()=>{document.querySelector('[data-view="buscar"]').click();selectFood(f)};c.appendChild(b)}}
+$("groupSelect").onchange=renderGroup;$("groupFilter").oninput=renderGroup;
 
-  let database = null;
-  let foods = [];
-  let visibleSubstitutes = [];
-  let substituteLimit = INITIAL_SUBSTITUTE_LIMIT;
-  let currentFood = null;
+bindSuggest("compareAInput","compareASuggestions",f=>{compareA=f;$("compareAInput").value=f.nombre;renderCompare()});
+bindSuggest("compareBInput","compareBSuggestions",f=>{compareB=f;$("compareBInput").value=f.nombre;renderCompare()});
+function renderCompare(){if(!compareA||!compareB){$("compareEmpty").hidden=false;$("compareTableWrap").hidden=true;return}$("compareEmpty").hidden=true;$("compareTableWrap").hidden=false;let keys=["energia","proteina","lipidos","hidratos_carbono","fibra","sodio","potasio","calcio","indice_glicemico","carga_glicemica"];let rows=[["Grupo",compareA.grupo,compareB.grupo],["Porción",portion(compareA),portion(compareB)]];for(const k of keys){let a=compareA.nutrimentos?.[k],b=compareB.nutrimentos?.[k];if(!a&&!b)continue;rows.push([labels[k]||k,a?.valor==null?"ND":`${fmt(a.valor)} ${a.unidad||""}${est(a)?" *":""}`,b?.valor==null?"ND":`${fmt(b.valor)} ${b.unidad||""}${est(b)?" *":""}`])}$("compareTable").innerHTML=`<table class="compare-table"><thead><tr><th>Dato</th><th>${esc(compareA.nombre)}</th><th>${esc(compareB.nombre)}</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td></tr>`).join("")}</tbody></table><p class="muted">* valor estimado en la base v7.</p>`}
 
-  const el = (id) => document.getElementById(id);
-  const search = el("foodSearch");
-  const suggestions = el("suggestions");
-  const emptyState = el("emptyState");
-  const foodView = el("foodView");
-  const status = el("dataStatus");
+bindSuggest("eqFoodInput","eqSuggestions",f=>{eqFood=f;$("eqFoodInput").value=f.nombre});
+$("eqCalculate").onclick=()=>{if(!eqFood){alert("Selecciona un alimento.");return}let n=Number($("eqCount").value);if(!(n>0)){alert("Indica un número de equivalentes mayor que cero.");return}let p=eqFood.porcion||{},qty=p.cantidad;let result=$("eqResult");result.hidden=false;if(qty==null){result.innerHTML=`<h3>${esc(eqFood.nombre)}</h3><p>No fue posible convertir numéricamente la porción fuente. Usa ${esc(p.cantidad_fuente||"la porción indicada")} ${esc(p.unidad||"")} por equivalente.</p>`;return}let total=qty*n;result.innerHTML=`<h3>${esc(eqFood.nombre)}</h3><div class="result-highlight">${fmt(total)} ${esc(p.unidad||"")}</div><p>${fmt(n)} equivalentes × ${fmt(qty)} ${esc(p.unidad||"")} por equivalente.</p><p class="muted">La operación supone que la porción sugerida del registro representa 1 equivalente SMAE.</p>`};
 
-  const labels = {
-    peso_bruto: "Peso bruto",
-    peso_neto: "Peso neto",
-    energia: "Energía",
-    proteina: "Proteína",
-    lipidos: "Lípidos",
-    hidratos_carbono: "Hidratos de carbono",
-    fibra: "Fibra",
-    vitamina_a: "Vitamina A",
-    acido_ascorbico: "Ácido ascórbico",
-    acido_folico: "Ácido fólico",
-    hierro_no_hem: "Hierro no hem",
-    hierro: "Hierro",
-    calcio: "Calcio",
-    sodio: "Sodio",
-    potasio: "Potasio",
-    selenio: "Selenio",
-    colesterol: "Colesterol",
-    indice_glicemico: "Índice glicémico",
-    carga_glicemica: "Carga glicémica",
-    azucar_por_equivalente: "Azúcar por equivalente",
-    azucares_por_equivalente: "Azúcares por equivalente",
-    acidos_grasos_saturados: "Ácidos grasos saturados",
-    acidos_grasos_monoinsaturados: "Ácidos grasos monoinsaturados",
-    acidos_grasos_poliinsaturados: "Ácidos grasos poliinsaturados",
-    etanol: "Etanol"
-  };
+bindSuggest("assistantFoodInput","assistantSuggestions",f=>{assistantFood=f;$("assistantFoodInput").value=f.nombre;addBubble(`Quiero sustituir: ${f.nombre}`,"user");addBubble(`Encontré ${foods.filter(x=>x.id!==f.id&&x.grupo_codigo===f.grupo_codigo).length} opciones del grupo ${f.grupo}. ¿Qué objetivo prefieres?`,"bot");$("assistantGoals").hidden=false});
+function addBubble(text,who){let d=document.createElement("div");d.className="bubble "+who;d.textContent=text;$("chat").appendChild(d);$("chat").scrollTop=$("chat").scrollHeight}
+document.querySelectorAll("#assistantGoals button").forEach(b=>b.onclick=()=>runAssistant(b.dataset.goal));
+function runAssistant(goal){if(!assistantFood)return;let candidates=foods.filter(x=>x.id!==assistantFood.id&&x.grupo_codigo===assistantFood.grupo_codigo);let getter,desc;
+if(goal==="similar"){let t=nval(assistantFood,"energia");getter=f=>t==null||nval(f,"energia")==null?999999:Math.abs(nval(f,"energia")-t);desc="más similares en energía"}
+if(goal==="menos_energia"){getter=f=>nval(f,"energia")==null?999999:nval(f,"energia");desc="con menor energía"}
+if(goal==="mas_fibra"){getter=f=>nval(f,"fibra")==null?999999:-nval(f,"fibra");desc="con mayor fibra"}
+if(goal==="menos_sodio"){getter=f=>nval(f,"sodio")==null?999999:nval(f,"sodio");desc="con menor sodio"}
+if(goal==="mas_proteina"){getter=f=>nval(f,"proteina")==null?999999:-nval(f,"proteina");desc="con mayor proteína"}
+candidates.sort((a,b)=>getter(a)-getter(b));let top=candidates.filter(f=>getter(f)!==999999).slice(0,5);addBubble(`Busco opciones ${desc}.`,"user");if(!top.length){addBubble("No hay datos suficientes para ordenar los sustitutos con ese criterio.","bot");return}let txt=`Sugerencias ${desc}: `+top.map(f=>`${f.nombre} (${portion(f)})`).join("; ")+".";addBubble(txt,"bot")}
 
-  function normalize(text) {
-    return String(text || "")
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase()
-      .trim();
-  }
-
-  function escapeHtml(value) {
-    return String(value ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
-  async function loadData() {
-    try {
-      // Preferred path when the folder is served by a simple HTTP server.
-      const response = await fetch(JSON_URL, { cache: "no-store" });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      database = await response.json();
-      foods = database.alimentos || [];
-      setReady(`JSON cargado · ${foods.length.toLocaleString("es-MX")} alimentos`);
-    } catch (error) {
-      // Fallback allows opening index.html directly from disk (file://).
-      if (window.SMAE_DATA?.alimentos) {
-        database = window.SMAE_DATA;
-        foods = database.alimentos;
-        setReady(`Datos locales · ${foods.length.toLocaleString("es-MX")} alimentos`);
-      } else {
-        status.textContent = "No se pudieron cargar los datos";
-        console.error(error);
-      }
-    }
-  }
-
-  function setReady(message) {
-    status.textContent = message;
-    status.classList.add("ready");
-    search.disabled = false;
-  }
-
-  function formatNumber(value) {
-    if (value === null || value === undefined || Number.isNaN(Number(value))) return "ND";
-    return Number(value).toLocaleString("es-MX", { maximumFractionDigits: 2 });
-  }
-
-  function portionText(food) {
-    const p = food.porcion || {};
-    const qty = p.cantidad_fuente || (p.cantidad != null ? formatNumber(p.cantidad) : "");
-    return [qty, p.unidad].filter(Boolean).join(" ");
-  }
-
-  function nutrientValue(food, key) {
-    return food.nutrimentos?.[key]?.valor ?? null;
-  }
-
-  function energyValue(food) {
-    return nutrientValue(food, "energia");
-  }
-
-  function isEstimated(obj) {
-    return obj?.estado === "estimado" || obj?.correccion?.tipo === "estimacion_por_coherencia";
-  }
-
-  function searchFoods(query, limit = 12) {
-    const q = normalize(query);
-    if (q.length < 2) return [];
-
-    const starts = [];
-    const contains = [];
-    for (const food of foods) {
-      const name = food.nombre_busqueda || normalize(food.nombre);
-      if (name.startsWith(q)) starts.push(food);
-      else if (name.includes(q)) contains.push(food);
-    }
-    return starts.concat(contains).slice(0, limit);
-  }
-
-  function renderSuggestions(matches) {
-    suggestions.innerHTML = "";
-    if (!matches.length) {
-      suggestions.hidden = true;
-      return;
-    }
-    for (const food of matches) {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "suggestion";
-      button.setAttribute("role", "option");
-      button.innerHTML = `<span><strong>${escapeHtml(food.nombre)}</strong><br><small>${escapeHtml(portionText(food))}</small></span>
-                          <small>${escapeHtml(food.grupo)}</small>`;
-      button.addEventListener("click", () => selectFood(food));
-      suggestions.appendChild(button);
-    }
-    suggestions.hidden = false;
-  }
-
-  function selectFood(food) {
-    currentFood = food;
-    search.value = food.nombre;
-    suggestions.hidden = true;
-    emptyState.hidden = true;
-    foodView.hidden = false;
-    substituteLimit = INITIAL_SUBSTITUTE_LIMIT;
-
-    el("foodName").textContent = food.nombre;
-    el("foodGroup").textContent = food.grupo;
-    el("foodPortion").textContent = `Porción sugerida: ${portionText(food)}`;
-
-    renderEstimatedInfo(food);
-    renderNutrients(food);
-    renderSource(food);
-    buildSubstitutes(food);
-
-    if (window.innerWidth < 700) {
-      foodView.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }
-
-  function renderEstimatedInfo(food) {
-    const badge = el("estimatedBadge");
-    const notice = el("estimatedNotice");
-    const msg = el("estimatedMessage");
-    const detail = el("estimateDetail");
-    const estimated = Object.entries(food.nutrimentos || {})
-      .filter(([, obj]) => isEstimated(obj));
-
-    if (!estimated.length) {
-      badge.hidden = true;
-      notice.hidden = true;
-      detail.hidden = true;
-      detail.innerHTML = "";
-      return;
-    }
-
-    badge.hidden = false;
-    notice.hidden = false;
-    msg.textContent = database?.politica_uso_aplicacion?.mensaje_usuario_sugerido ||
-      "El dato original presenta una inconsistencia y para los cálculos se utiliza una estimación documentada.";
-
-    detail.innerHTML = estimated.map(([key, obj]) => {
-      const c = obj.correccion || {};
-      return `<div>
-        <strong>${escapeHtml(labels[key] || key)}</strong><br>
-        Valor fuente: ${escapeHtml(c.valor_original ?? obj.valor_fuente ?? "ND")} ${escapeHtml(obj.unidad || "")}<br>
-        Valor usado: ${escapeHtml(c.valor_estimado ?? obj.valor)} ${escapeHtml(obj.unidad || "")}<br>
-        ${c.intervalo_estimado ? `Intervalo considerado: ${c.intervalo_estimado.join("–")} ${escapeHtml(obj.unidad || "")}<br>` : ""}
-        ${c.metodo ? `Método: ${escapeHtml(c.metodo.replaceAll("_", " "))}<br>` : ""}
-        ${c.motivo ? `<span>${escapeHtml(c.motivo)}</span>` : ""}
-      </div>`;
-    }).join("<hr>");
-  }
-
-  function renderNutrients(food) {
-    const grid = el("nutrientGrid");
-    grid.innerHTML = "";
-
-    const priority = [
-      "energia", "proteina", "lipidos", "hidratos_carbono", "fibra",
-      "peso_neto", "peso_bruto", "indice_glicemico", "carga_glicemica"
-    ];
-
-    const remaining = Object.keys(food.nutrimentos || {}).filter(k => !priority.includes(k));
-    const ordered = priority.concat(remaining);
-
-    for (const key of ordered) {
-      const obj = food.nutrimentos?.[key];
-      if (!obj) continue;
-      if (obj.valor === null && obj.estado !== "estimado") continue;
-
-      const item = document.createElement("div");
-      item.className = "nutrient" + (isEstimated(obj) ? " estimated" : "");
-      item.innerHTML = `<span class="label">${escapeHtml(labels[key] || key.replaceAll("_", " "))}${isEstimated(obj) ? " · estimado" : ""}</span>
-                        <span class="value">${escapeHtml(formatNumber(obj.valor))}${obj.unidad ? " " + escapeHtml(obj.unidad) : ""}</span>`;
-      grid.appendChild(item);
-    }
-  }
-
-  function renderSource(food) {
-    const dl = el("sourceInfo");
-    const warnings = food.validacion_semantica?.advertencias || [];
-    dl.innerHTML = `
-      <dt>Documento</dt><dd>${escapeHtml(food.fuente?.documento || "SMAE")}</dd>
-      <dt>Página PDF</dt><dd>${escapeHtml(food.fuente?.pagina_pdf ?? "ND")}</dd>
-      <dt>Estado</dt><dd>${escapeHtml(food.validacion_semantica?.estado || "sin advertencias")}</dd>
-      <dt>Advertencias activas</dt><dd>${warnings.length ? escapeHtml(warnings.map(w => w.codigo).join(", ")) : "Ninguna"}</dd>
-    `;
-  }
-
-  function buildSubstitutes(food) {
-    // grupo_codigo represents the exact SMAE group/subgroup used in the normalized JSON,
-    // e.g. cereales_sin_grasa, aoa_bajo, leche_entera, etc.
-    visibleSubstitutes = foods
-      .filter(x => x.id !== food.id && x.grupo_codigo === food.grupo_codigo)
-      .sort((a, b) => {
-        const ea = energyValue(a);
-        const eb = energyValue(b);
-        const target = energyValue(food);
-        if (target != null && ea != null && eb != null) {
-          return Math.abs(ea - target) - Math.abs(eb - target);
-        }
-        return a.nombre.localeCompare(b.nombre, "es");
-      });
-
-    el("substituteCount").textContent = visibleSubstitutes.length.toLocaleString("es-MX");
-    el("substituteIntro").textContent =
-      `Opciones del mismo grupo/subgrupo SMAE: ${food.grupo}. Haz clic en cualquiera para consultar su ficha.`;
-
-    renderSubstitutes();
-  }
-
-  function renderSubstitutes() {
-    const container = el("substitutes");
-    container.innerHTML = "";
-
-    const subset = visibleSubstitutes.slice(0, substituteLimit);
-    for (const food of subset) {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "substitute";
-      const kcal = energyValue(food);
-      const eObj = food.nutrimentos?.energia;
-      button.innerHTML = `
-        <strong>${escapeHtml(food.nombre)}</strong>
-        <span class="portion-text">${escapeHtml(portionText(food))}</span>
-        <span class="kcal">${kcal == null ? "ND" : formatNumber(kcal) + " kcal"}${isEstimated(eObj) ? " *" : ""}</span>
-      `;
-      button.title = "Consultar este alimento";
-      button.addEventListener("click", () => selectFood(food));
-      container.appendChild(button);
-    }
-
-    const more = el("showMore");
-    more.hidden = substituteLimit >= visibleSubstitutes.length;
-    more.textContent = `Ver más (${visibleSubstitutes.length - substituteLimit})`;
-  }
-
-  search.disabled = true;
-
-  search.addEventListener("input", () => {
-    const value = search.value;
-    renderSuggestions(searchFoods(value));
-    el("searchHelp").textContent = value.trim().length < 2
-      ? "Escribe al menos 2 letras para ver sugerencias."
-      : "Selecciona un alimento de la lista.";
-  });
-
-  search.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-      const matches = searchFoods(search.value, 1);
-      if (matches.length) selectFood(matches[0]);
-    }
-    if (event.key === "Escape") suggestions.hidden = true;
-  });
-
-  el("clearSearch").addEventListener("click", () => {
-    search.value = "";
-    suggestions.hidden = true;
-    search.focus();
-  });
-
-  el("showMore").addEventListener("click", () => {
-    substituteLimit += 10;
-    renderSubstitutes();
-  });
-
-  el("toggleEstimateDetail").addEventListener("click", () => {
-    const detail = el("estimateDetail");
-    detail.hidden = !detail.hidden;
-    el("toggleEstimateDetail").textContent = detail.hidden ? "Ver detalle" : "Ocultar detalle";
-  });
-
-  document.addEventListener("click", (event) => {
-    if (!event.target.closest(".search-box")) suggestions.hidden = true;
-  });
-
-  loadData();
+document.addEventListener("click",e=>{if(!e.target.closest(".search-wrap"))document.querySelectorAll(".suggestions").forEach(x=>x.hidden=true)});
+load();
 })();

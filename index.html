@@ -2,92 +2,127 @@
 <html lang="es-MX">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Mini aplicación local para consultar alimentos del SMAE y encontrar sustitutos equivalentes.">
-  <title>Mini SMAE</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Mini SMAE v2</title>
+  <meta name="description" content="Consulta local del SMAE: fichas, sustitutos, grupos, comparación, equivalentes y asistente de sustitución por reglas.">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <div class="brand-mark" aria-hidden="true">🥗</div>
-      <div>
-        <h1>Mini SMAE</h1>
-        <p>Consulta rápida de alimentos equivalentes</p>
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-icon">🥗</span>
+    <div><h1>Mini SMAE <small>v2</small></h1><p>Consulta local de alimentos equivalentes</p></div>
+  </div>
+  <span id="dataStatus" class="status">Cargando…</span>
+</header>
+
+<nav class="tabs" aria-label="Funciones">
+  <button class="tab active" data-view="buscar">🔎 Buscar</button>
+  <button class="tab" data-view="explorar">🧭 Explorar</button>
+  <button class="tab" data-view="comparar">⚖️ Comparar</button>
+  <button class="tab" data-view="equivalentes">🧮 Equivalentes</button>
+  <button class="tab" data-view="asistente">💬 Asistente</button>
+</nav>
+
+<main class="page">
+  <section id="view-buscar" class="view active">
+    <div class="hero">
+      <p class="eyebrow">Sistema Mexicano de Alimentos Equivalentes</p>
+      <h2>Busca un alimento</h2>
+      <p class="muted">Consulta su ficha y alimentos del mismo grupo o subgrupo SMAE.</p>
+      <div class="search-wrap">
+        <input id="foodSearch" type="search" placeholder="Ej. manzana, tortilla, brócoli…" autocomplete="off">
+        <div id="suggestions" class="suggestions" hidden></div>
       </div>
     </div>
-    <span id="dataStatus" class="status">Cargando datos…</span>
-  </header>
 
-  <main class="page">
-    <section class="hero" aria-labelledby="search-title">
-      <p class="eyebrow">Sistema Mexicano de Alimentos Equivalentes</p>
-      <h2 id="search-title">Busca un alimento</h2>
-      <p class="hero-copy">Consulta su ficha y encuentra alimentos del mismo grupo o subgrupo que pueden utilizarse como sustitutos equivalentes.</p>
+    <div id="searchEmpty" class="empty">
+      <div class="big-icon">🔎</div>
+      <h3>Escribe el nombre de un alimento</h3>
+      <p>Todo se consulta localmente en el JSON incluido.</p>
+    </div>
 
-      <div class="search-box">
-        <label class="sr-only" for="foodSearch">Nombre del alimento</label>
-        <input id="foodSearch" type="search" autocomplete="off"
-               placeholder="Ej. manzana, tortilla, brócoli…" aria-controls="suggestions">
-        <button id="clearSearch" type="button" class="clear-btn" aria-label="Limpiar búsqueda">×</button>
-        <div id="suggestions" class="suggestions" role="listbox" hidden></div>
-      </div>
-      <p id="searchHelp" class="search-help">Escribe al menos 2 letras para ver sugerencias.</p>
-    </section>
-
-    <section id="emptyState" class="empty-state">
-      <div class="empty-icon" aria-hidden="true">🔎</div>
-      <h3>Empieza escribiendo el nombre de un alimento</h3>
-      <p>La búsqueda se realiza localmente en el archivo JSON incluido con esta aplicación.</p>
-    </section>
-
-    <section id="foodView" class="food-layout" hidden>
-      <article class="card food-card">
-        <div class="card-header">
-          <div>
-            <p id="foodGroup" class="group-pill"></p>
-            <h2 id="foodName"></h2>
-            <p id="foodPortion" class="portion"></p>
-          </div>
-          <span id="estimatedBadge" class="estimated-badge" hidden>Valor estimado</span>
+    <div id="foodView" class="grid-two" hidden>
+      <article class="card">
+        <div class="card-head">
+          <div><span id="foodGroup" class="pill"></span><h2 id="foodName"></h2><p id="foodPortion" class="muted"></p></div>
+          <span id="estimatedBadge" class="warning-badge" hidden>Estimado</span>
         </div>
-
         <div id="estimatedNotice" class="notice" hidden>
-          <strong>Dato estimado.</strong>
-          <span id="estimatedMessage"></span>
-          <button id="toggleEstimateDetail" class="text-button" type="button">Ver detalle</button>
+          <strong>Valor estimado.</strong> <span id="estimatedMessage"></span>
+          <button id="estimateToggle" class="link-btn">Ver detalle</button>
           <div id="estimateDetail" class="estimate-detail" hidden></div>
         </div>
-
         <h3>Ficha nutrimental</h3>
         <div id="nutrientGrid" class="nutrient-grid"></div>
-
-        <details class="source-details">
-          <summary>Fuente y validación</summary>
-          <dl id="sourceInfo"></dl>
-        </details>
+        <details class="details"><summary>Fuente y validación</summary><dl id="sourceInfo"></dl></details>
       </article>
 
-      <aside class="card substitutes-card">
-        <div class="substitutes-header">
-          <div>
-            <p class="eyebrow">Sustitución</p>
-            <h2>Alimentos equivalentes</h2>
-          </div>
-          <span id="substituteCount" class="count-badge"></span>
-        </div>
-        <p id="substituteIntro" class="muted"></p>
-        <div id="substitutes" class="substitutes-list"></div>
-        <button id="showMore" class="secondary-button" type="button" hidden>Ver más</button>
+      <aside class="card">
+        <div class="card-head"><div><p class="eyebrow">Sustitución</p><h2>Alimentos equivalentes</h2></div><span id="subCount" class="pill"></span></div>
+        <p id="subIntro" class="muted"></p>
+        <div id="substitutes" class="list"></div>
+        <button id="showMore" class="secondary" hidden>Ver más</button>
       </aside>
-    </section>
-  </main>
+    </div>
+  </section>
 
-  <footer>
-    <p>Mini SMAE · Datos locales provenientes del JSON SMAE v7 validado.</p>
-  </footer>
+  <section id="view-explorar" class="view">
+    <div class="section-head"><div><p class="eyebrow">Catálogo</p><h2>Explorar por grupo</h2></div></div>
+    <div class="toolbar">
+      <select id="groupSelect"><option value="">Selecciona un grupo o subgrupo…</option></select>
+      <input id="groupFilter" type="search" placeholder="Filtrar dentro del grupo…">
+    </div>
+    <div id="groupSummary" class="summary-box" hidden></div>
+    <div id="groupFoods" class="cards-grid"></div>
+  </section>
 
-  <script src="data/smae-data.js"></script>
-  <script src="app.js"></script>
+  <section id="view-comparar" class="view">
+    <div class="section-head"><div><p class="eyebrow">Análisis</p><h2>Comparar dos alimentos</h2></div></div>
+    <div class="compare-pickers">
+      <div class="search-wrap"><input id="compareAInput" placeholder="Primer alimento…" autocomplete="off"><div id="compareASuggestions" class="suggestions" hidden></div></div>
+      <div class="compare-vs">vs.</div>
+      <div class="search-wrap"><input id="compareBInput" placeholder="Segundo alimento…" autocomplete="off"><div id="compareBSuggestions" class="suggestions" hidden></div></div>
+    </div>
+    <div id="compareEmpty" class="empty compact"><p>Selecciona dos alimentos para verlos lado a lado.</p></div>
+    <div id="compareTableWrap" class="card" hidden><div id="compareTable"></div></div>
+  </section>
+
+  <section id="view-equivalentes" class="view">
+    <div class="section-head"><div><p class="eyebrow">Cálculo local</p><h2>Calculadora de equivalentes</h2></div></div>
+    <div class="card narrow">
+      <label>Alimento</label>
+      <div class="search-wrap"><input id="eqFoodInput" placeholder="Buscar alimento…" autocomplete="off"><div id="eqSuggestions" class="suggestions" hidden></div></div>
+      <label for="eqCount">Número de equivalentes</label>
+      <input id="eqCount" type="number" min="0.25" step="0.25" value="1">
+      <button id="eqCalculate" class="primary">Calcular</button>
+      <div id="eqResult" class="result-box" hidden></div>
+    </div>
+  </section>
+
+  <section id="view-asistente" class="view">
+    <div class="section-head"><div><p class="eyebrow">Agente basado en reglas</p><h2>Asistente de sustitución</h2></div></div>
+    <div class="assistant-shell">
+      <div id="chat" class="chat">
+        <div class="bubble bot">Hola. Elige un alimento y te ayudaré a encontrar sustitutos del mismo grupo SMAE según tu objetivo.</div>
+      </div>
+      <div class="assistant-controls">
+        <div class="search-wrap"><input id="assistantFoodInput" placeholder="¿Qué alimento quieres sustituir?" autocomplete="off"><div id="assistantSuggestions" class="suggestions" hidden></div></div>
+        <div id="assistantGoals" class="goal-buttons" hidden>
+          <button data-goal="similar">Similar en energía</button>
+          <button data-goal="menos_energia">Menos energía</button>
+          <button data-goal="mas_fibra">Más fibra</button>
+          <button data-goal="menos_sodio">Menos sodio</button>
+          <button data-goal="mas_proteina">Más proteína</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>Mini SMAE v2 · HTML + CSS + JavaScript + JSON · Sin instalación ni servidor de base de datos.</footer>
+
+<script src="data/smae-data.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
