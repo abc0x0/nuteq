@@ -146,3 +146,52 @@ footer{text-align:center;color:var(--muted);border-top:1px solid var(--line);pad
   vertical-align:middle;
 }
 .v51-alt-applied button{background:#eaf5ff;border-color:#9fc9eb;color:#246c9d}
+
+
+/* ===== Mini SMAE v5.2 ===== */
+.v52-goal-label{
+  color:var(--text)!important;
+  font-weight:700;
+  background:#edf5ef;
+  border:1px solid #cfe0d3;
+  border-radius:10px;
+  padding:5px 9px;
+}
+.v52-goal-label b{
+  color:var(--green);
+  font-size:1.12em;
+}
+.v52-target-value{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:14px;
+  padding:10px 12px;
+  background:#f8faf8;
+  border:1px solid var(--line);
+  border-radius:10px;
+  font-size:13px;
+}
+.v52-target-value b{color:var(--green);font-size:14px}
+.v5-table tfoot tr.v5-difference td.v52-good{
+  color:#26733c;
+  background:#eef8f0!important;
+}
+.v5-table tfoot tr.v5-difference td.v52-out{
+  color:#a33131;
+  background:#fff0f0!important;
+}
+.v52-good-badge{
+  display:inline-block;
+  margin-left:7px;
+  padding:3px 7px;
+  border-radius:999px;
+  background:#e7f6ea;
+  color:#26733c;
+  font-size:10px;
+}
+.v52-devline{
+  display:block;
+  margin-top:4px;
+  color:#59685d!important;
+}

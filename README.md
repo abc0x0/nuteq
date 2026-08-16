@@ -115,3 +115,17 @@ Cambios respecto a v5:
 - Las demás alternativas continúan disponibles y pueden aplicarse manualmente.
 - Las filas cuyas cantidades cambian reciben una animación temporal para confirmar visualmente la actualización.
 - La columna «Cantidad» se resalta permanentemente en azul claro para facilitar su lectura.
+
+
+## Mini SMAE v5.2
+
+Cambios principales:
+
+- El perfil objetivo usa unidades absolutas: kcal, g de proteína, g de lípidos, g de hidratos y conteo de hidratos.
+- Los objetivos ya no necesitan sumar 100%.
+- El renglón «IDEAL (Objetivo)» muestra todos los valores del perfil.
+- El renglón «DIFERENCIA» muestra la diferencia de cada variable y colorea según el margen ±10%.
+- El resumen actual hace más visible la energía objetivo.
+- La optimización se ordena exclusivamente por cercanía relativa al perfil completo.
+- Un resultado se considera bueno cuando todas las referencias quedan dentro de ±10%.
+- La mejor alternativa se aplica automáticamente y se conservan hasta tres alternativas adicionales.

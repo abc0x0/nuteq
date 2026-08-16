@@ -23,18 +23,99 @@ const rows=[
  {g:"Bebidas alcohólicas",s:"",min:1,max:23,q:1,k:140,p:0,f:0,c:20,cho:1.3,e:"🍺"}
 ];
 const defaults=JSON.parse(JSON.stringify(rows));
-let profile={name:"General",sex:"Hombre",age:50,condition:"Sin condición clínica",goal:1800,macro:{p:20,f:30,c:50}};
-const saved=localStorage.getItem("miniSmaeV5Profile"); if(saved){try{profile={...profile,...JSON.parse(saved)}}catch(_){}}
+let profile={
+ name:"General",sex:"Hombre",age:50,condition:"Sin condición clínica",
+ goal:1800,target:{p:82,f:57,c:182,cho:12.2}
+};
+const saved=localStorage.getItem("miniSmaeV5Profile");
+if(saved){
+ try{
+   const old=JSON.parse(saved);
+   profile={...profile,...old};
+   if(old.target){
+     profile.target={...profile.target,...old.target};
+   }else if(old.macro){
+     // Migración transparente desde v5/v5.1: convierte porcentajes a gramos.
+     const g=Number(old.goal)||profile.goal;
+     profile.target={
+       p:g*(Number(old.macro.p)||0)/100/4,
+       f:g*(Number(old.macro.f)||0)/100/9,
+       c:g*(Number(old.macro.c)||0)/100/4,
+       cho:profile.target.cho
+     };
+     delete profile.macro;
+   }
+ }catch(_){}
+}
 const savedRows=localStorage.getItem("miniSmaeV5Table"); if(savedRows){try{const a=JSON.parse(savedRows);a.forEach((x,i)=>{if(rows[i])Object.assign(rows[i],x)})}catch(_){}}
 function fmt(x,d=0){return Number(x).toLocaleString("es-MX",{maximumFractionDigits:d})}
 function totals(qs=rows.map(r=>r.q)){return rows.reduce((a,r,i)=>{let q=qs[i];a.q+=q;a.k+=q*r.k;a.p+=q*r.p;a.f+=q*r.f;a.c+=q*r.c;a.cho+=q*r.cho;return a},{q:0,k:0,p:0,f:0,c:0,cho:0})}
-function macroTargets(){return {p:profile.goal*profile.macro.p/100/4,f:profile.goal*profile.macro.f/100/9,c:profile.goal*profile.macro.c/100/4}}
-function macroPenalty(t){const m=macroTargets();return Math.abs(t.p-m.p)/(m.p||1)+Math.abs(t.f-m.f)/(m.f||1)+Math.abs(t.c-m.c)/(m.c||1)}
-function profileRender(){ $("v5ProfileTitle").textContent="👤 "+profile.name;$("v5Sex").textContent=profile.sex;$("v5Age").textContent=profile.age;$("v5Condition").textContent=profile.condition;$("v5Goal").textContent=profile.goal;$("v5Goal2").textContent=profile.goal; const m=macroTargets();$("v5MacroTarget").innerHTML=[["Proteína",profile.macro.p,m.p,"g"],["Lípidos",profile.macro.f,m.f,"g"],["Hidratos",profile.macro.c,m.c,"g"]].map(x=>`<div class="v5-target-row"><span>${x[0]}</span><div class="v5-target-bar"><span style="width:${x[1]}%"></span></div><b>${fmt(x[2],1)} ${x[3]}</b></div>`).join("")}
-function render(){profileRender();let b=$("v5TableBody");b.innerHTML=rows.map((r,i)=>`<tr data-i="${i}"><td><span class="v5-group-emoji">${r.e}</span><strong>${r.g}</strong></td><td>${r.s||"—"}</td><td><input class="v5-limit v5-min" data-i="${i}" type="number" min="0" max="99" step="1" value="${r.min}"></td><td><input class="v5-limit v5-max" data-i="${i}" type="number" min="0" max="99" step="1" value="${r.max}"></td><td><div class="v5-qty"><button data-act="minus" data-i="${i}">−</button><input class="v5-q" data-i="${i}" type="number" step="1" value="${r.q}"><button data-act="plus" data-i="${i}">+</button></div></td><td>${fmt(r.q*r.k)}</td><td>${fmt(r.q*r.p)}</td><td>${fmt(r.q*r.f)}</td><td>${fmt(r.q*r.c)}</td><td>${fmt(r.q*r.cho,1)}</td></tr>`).join("");
- let t=totals(),d=t.k-profile.goal,cls=Math.abs(d)<=20?"v5-kcal-ok":Math.abs(d)<=100?"v5-kcal-warn":"v5-kcal-bad";$("v5TableFoot").innerHTML=`<tr><td colspan="4">TOTAL</td><td>${t.q}</td><td>${fmt(t.k)}</td><td>${fmt(t.p)}</td><td>${fmt(t.f)}</td><td>${fmt(t.c)}</td><td>${fmt(t.cho,1)}</td></tr><tr class="v5-ideal"><td colspan="5">IDEAL (Objetivo)</td><td>${fmt(profile.goal)}</td><td colspan="4">Prioridad 2: ${profile.macro.p}% P · ${profile.macro.f}% L · ${profile.macro.c}% HC</td></tr><tr class="v5-difference"><td colspan="5">DIFERENCIA</td><td class="${cls}">${d>0?"+":""}${fmt(d)}</td><td colspan="4"></td></tr>`;
- $("v5TotalKcal").textContent=fmt(t.k);$("v5Protein").textContent=fmt(t.p)+" g";$("v5Fat").textContent=fmt(t.f)+" g";$("v5Carbs").textContent=fmt(t.c)+" g";$("v5Cho").textContent=fmt(t.cho,1);$("v5ProgressBar").style.width=Math.min(100,t.k/profile.goal*100)+"%";$("v5Diff").className="v5-diff "+cls;$("v5Diff").textContent=d===0?"Objetivo energético exacto":`${Math.abs(d)} kcal ${d<0?"por debajo":"por encima"} del objetivo`;
- bindTable(); localStorage.setItem("miniSmaeV5Table",JSON.stringify(rows.map(r=>({min:r.min,max:r.max,q:r.q}))));}
+function targetObj(){return {k:Number(profile.goal)||0,p:Number(profile.target.p)||0,f:Number(profile.target.f)||0,c:Number(profile.target.c)||0,cho:Number(profile.target.cho)||0}}
+function relDev(actual,target){
+ if(target===0)return actual===0?0:999;
+ return Math.abs(actual-target)/Math.abs(target);
+}
+function profileScore(t){
+ const z=targetObj();
+ const dev=[relDev(t.k,z.k),relDev(t.p,z.p),relDev(t.f,z.f),relDev(t.c,z.c),relDev(t.cho,z.cho)];
+ const outside=dev.filter(x=>x>.10+1e-9).length;
+ const max=Math.max(...dev);
+ const mean=dev.reduce((a,b)=>a+b,0)/dev.length;
+ const rms=Math.sqrt(dev.reduce((a,b)=>a+b*b,0)/dev.length);
+ return {outside,max,mean,rms,dev};
+}
+function compareProfile(a,b){
+ const A=profileScore(a),B=profileScore(b);
+ return A.outside-B.outside || A.max-B.max || A.rms-B.rms || A.mean-B.mean || a.q-b.q;
+}
+function isGood(t){return profileScore(t).outside===0}
+function signed(v,d=0){return `${v>0?"+":""}${fmt(v,d)}`}
+function diffClass(actual,target){
+ const d=relDev(actual,target);
+ return d<=.10+1e-9?"v52-good":"v52-out";
+}
+function profileRender(){
+ $("v5ProfileTitle").textContent="👤 "+profile.name;
+ $("v5Sex").textContent=profile.sex;
+ $("v5Age").textContent=profile.age;
+ $("v5Condition").textContent=profile.condition;
+ $("v5Goal").textContent=fmt(profile.goal);
+ $("v5Goal2").textContent=fmt(profile.goal);
+ const z=targetObj();
+ const items=[
+   ["🔥 Energía",z.k,"kcal"],["🥩 Proteína",z.p,"g"],["🫒 Lípidos",z.f,"g"],
+   ["🌾 Hidratos",z.c,"g"],["🔢 Conteo HC",z.cho,""]
+ ];
+ $("v5MacroTarget").innerHTML=items.map(x=>`<div class="v52-target-value"><span>${x[0]}</span><b>${fmt(x[1],x[0].includes("Conteo")?1:0)} ${x[2]}</b></div>`).join("");
+}
+function render(){
+ profileRender();
+ let b=$("v5TableBody");
+ b.innerHTML=rows.map((r,i)=>`<tr data-i="${i}"><td><span class="v5-group-emoji">${r.e}</span><strong>${r.g}</strong></td><td>${r.s||"—"}</td><td><input class="v5-limit v5-min" data-i="${i}" type="number" min="0" max="99" step="1" value="${r.min}"></td><td><input class="v5-limit v5-max" data-i="${i}" type="number" min="0" max="99" step="1" value="${r.max}"></td><td><div class="v5-qty"><button data-act="minus" data-i="${i}">−</button><input class="v5-q" data-i="${i}" type="number" step="1" value="${r.q}"><button data-act="plus" data-i="${i}">+</button></div></td><td>${fmt(r.q*r.k)}</td><td>${fmt(r.q*r.p)}</td><td>${fmt(r.q*r.f)}</td><td>${fmt(r.q*r.c)}</td><td>${fmt(r.q*r.cho,1)}</td></tr>`).join("");
+ const t=totals(),z=targetObj(),s=profileScore(t);
+ const dk=t.k-z.k,dp=t.p-z.p,df=t.f-z.f,dc=t.c-z.c,dcho=t.cho-z.cho;
+ $("v5TableFoot").innerHTML=`
+ <tr><td colspan="4">TOTAL</td><td>${t.q}</td><td>${fmt(t.k)}</td><td>${fmt(t.p)}</td><td>${fmt(t.f)}</td><td>${fmt(t.c)}</td><td>${fmt(t.cho,1)}</td></tr>
+ <tr class="v5-ideal"><td colspan="4">IDEAL (Objetivo)</td><td>—</td><td>${fmt(z.k)}</td><td>${fmt(z.p,1)}</td><td>${fmt(z.f,1)}</td><td>${fmt(z.c,1)}</td><td>${fmt(z.cho,1)}</td></tr>
+ <tr class="v5-difference"><td colspan="4">DIFERENCIA</td><td>—</td>
+ <td class="${diffClass(t.k,z.k)}">${signed(dk)}</td>
+ <td class="${diffClass(t.p,z.p)}">${signed(dp,1)}</td>
+ <td class="${diffClass(t.f,z.f)}">${signed(df,1)}</td>
+ <td class="${diffClass(t.c,z.c)}">${signed(dc,1)}</td>
+ <td class="${diffClass(t.cho,z.cho)}">${signed(dcho,1)}</td></tr>`;
+ $("v5TotalKcal").textContent=fmt(t.k);
+ $("v5Protein").textContent=fmt(t.p)+" g";
+ $("v5Fat").textContent=fmt(t.f)+" g";
+ $("v5Carbs").textContent=fmt(t.c)+" g";
+ $("v5Cho").textContent=fmt(t.cho,1);
+ $("v5ProgressBar").style.width=Math.min(100,z.k? t.k/z.k*100:0)+"%";
+ $("v5Diff").className="v5-diff "+(s.outside===0?"v5-kcal-ok":"v5-kcal-warn");
+ $("v5Diff").textContent=s.outside===0
+   ?"✓ Perfil dentro de ±10% en todas las referencias"
+   :`${s.outside} de 5 referencias fuera del margen ±10%`;
+ bindTable();
+ localStorage.setItem("miniSmaeV5Table",JSON.stringify(rows.map(r=>({min:r.min,max:r.max,q:r.q}))));
+}
 function clamp(i,v){const r=rows[i];return Math.max(r.min,Math.min(r.max,Math.round(Number(v)||0)))}
 function bindTable(){document.querySelectorAll("#v5TableBody button[data-act]").forEach(b=>b.onclick=()=>{let i=+b.dataset.i;rows[i].q=clamp(i,rows[i].q+(b.dataset.act==="plus"?1:-1));render()});document.querySelectorAll(".v5-q").forEach(x=>x.onchange=()=>{let i=+x.dataset.i;rows[i].q=clamp(i,x.value);render()});document.querySelectorAll(".v5-min").forEach(x=>x.onchange=()=>{let i=+x.dataset.i;rows[i].min=Math.max(0,Math.round(+x.value||0));if(rows[i].max<rows[i].min)rows[i].max=rows[i].min;rows[i].q=clamp(i,rows[i].q);render()});document.querySelectorAll(".v5-max").forEach(x=>x.onchange=()=>{let i=+x.dataset.i;rows[i].max=Math.max(rows[i].min,Math.round(+x.value||0));rows[i].q=clamp(i,rows[i].q);render()})}
 function stateTotals(qs){return totals(qs)}
@@ -51,15 +132,45 @@ function flashOptimizedRows(previousQs,newQs){
  });
  setTimeout(()=>document.querySelectorAll(".v51-row-changed").forEach(el=>el.classList.remove("v51-row-changed")),1800);
 }
-function optimize(){const goal=profile.goal,cap=Math.max(goal+500,Math.round(goal*1.25));let states=new Map([[0,[{qs:[],p:0,f:0,c:0,cho:0,q:0}]]]);rows.forEach((r,idx)=>{let next=new Map();for(const [energy,list] of states){for(const st of list){for(let q=r.min;q<=r.max;q++){let ne=energy+q*r.k;if(ne>cap&&r.k>0)continue;let ns={qs:st.qs.concat(q),p:st.p+q*r.p,f:st.f+q*r.f,c:st.c+q*r.c,cho:st.cho+q*r.cho,q:st.q+q};let arr=next.get(ne)||[];arr.push(ns);if(arr.length>12){arr.sort((a,b)=>{let ta={k:ne,p:a.p,f:a.f,c:a.c},tb={k:ne,p:b.p,f:b.f,c:b.c};return macroPenalty(ta)-macroPenalty(tb)||a.q-b.q});arr.length=12}next.set(ne,arr)}}}states=next});
- let all=[];for(const [k,list] of states)for(const s of list)all.push({k,...s});if(!all.length)return;const minDiff=Math.min(...all.map(x=>Math.abs(x.k-goal)));const near=all.filter(x=>Math.abs(x.k-goal)<=minDiff+60);let chosen=[];function add(x,label){if(!x)return;if(chosen.some(y=>y.qs.join(",")===x.qs.join(",")))return;chosen.push({...x,label})}
- add([...all].sort((a,b)=>Math.abs(a.k-goal)-Math.abs(b.k-goal)||macroPenalty(a)-macroPenalty(b)||a.q-b.q)[0],"Más cercana");
- add([...near].sort((a,b)=>macroPenalty(a)-macroPenalty(b)||Math.abs(a.k-goal)-Math.abs(b.k-goal)||a.q-b.q)[0],"Más equilibrada");
- add([...near].sort((a,b)=>a.q-b.q||Math.abs(a.k-goal)-Math.abs(b.k-goal)||macroPenalty(a)-macroPenalty(b))[0],"Menos equivalentes");
- for(const x of [...all].sort((a,b)=>Math.abs(a.k-goal)-Math.abs(b.k-goal)||macroPenalty(a)-macroPenalty(b))){add(x,"Alternativa similar");if(chosen.length>=4)break}
- chosen=chosen.slice(0,4);
- const best=chosen[0];
- const previousQs=rows.map(r=>r.q);
+function optimize(){
+ const z=targetObj();
+ // La energía sigue siendo una dimensión eficiente para el DP, pero la selección
+ // final se ordena exclusivamente por diferencia relativa frente al perfil completo.
+ const maxPossible=rows.reduce((a,r)=>a+r.max*r.k,0);
+ const cap=Math.min(maxPossible,Math.max(Math.round(z.k*2),z.k+1500));
+ let states=new Map([[0,[{qs:[],p:0,f:0,c:0,cho:0,q:0}]]]);
+ rows.forEach(r=>{
+   const next=new Map();
+   for(const [energy,list] of states){
+     for(const st of list){
+       for(let q=r.min;q<=r.max;q++){
+         const ne=energy+q*r.k;
+         if(ne>cap&&r.k>0)continue;
+         const ns={qs:st.qs.concat(q),p:st.p+q*r.p,f:st.f+q*r.f,c:st.c+q*r.c,cho:st.cho+q*r.cho,q:st.q+q};
+         let arr=next.get(ne)||[];
+         arr.push(ns);
+         // Conserva varias configuraciones por energía, priorizando el perfil completo.
+         if(arr.length>20){
+           arr.sort((a,b)=>compareProfile({k:ne,...a},{k:ne,...b}));
+           arr.length=20;
+         }
+         next.set(ne,arr);
+       }
+     }
+   }
+   states=next;
+ });
+ let all=[];
+ for(const [k,list] of states)for(const s of list)all.push({k,...s});
+ if(!all.length)return;
+ all.sort(compareProfile);
+ const chosen=[];
+ for(const x of all){
+   if(chosen.some(y=>y.qs.join(",")===x.qs.join(",")))continue;
+   chosen.push({...x,label:chosen.length===0?"Más cercana al perfil":`Alternativa ${chosen.length+1}`});
+   if(chosen.length>=4)break;
+ }
+ const best=chosen[0],previousQs=rows.map(r=>r.q);
  if(best){
    best.qs.forEach((q,i)=>rows[i].q=q);
    render();
@@ -67,19 +178,28 @@ function optimize(){const goal=profile.goal,cap=Math.max(goal+500,Math.round(goa
  }
  renderAlternatives(chosen,true);
 }
+function altDeviations(x){
+ const z=targetObj();
+ const vals=[
+   ["E",x.k,z.k],["P",x.p,z.p],["L",x.f,z.f],["HC",x.c,z.c],["CHO",x.cho,z.cho]
+ ];
+ return vals.map(([n,a,t])=>`${n} ${t?((a-t)/t*100).toFixed(1):"—"}%`).join(" · ");
+}
 function renderAlternatives(list,autoApplied=false){
  $("v5Alternatives").innerHTML=list.map((x,i)=>{
-   let d=x.k-profile.goal;
    const applied=autoApplied&&i===0;
+   const good=isGood(x);
+   const sc=profileScore(x);
    return `<div class="v5-alt ${applied?"v51-alt-applied":""}">
-     <div><strong>${i+1}. ${x.label}${applied?' <span class="v51-applied-badge">Aplicada automáticamente</span>':''}</strong>
-     <small>${fmt(x.k)} kcal (${d>0?"+":""}${fmt(d)}) · P ${fmt(x.p)} g · L ${fmt(x.f)} g · HC ${fmt(x.c)} g · ${x.q} equivalentes</small></div>
+     <div><strong>${i+1}. ${x.label}${applied?' <span class="v51-applied-badge">Aplicada automáticamente</span>':''}
+       ${good?'<span class="v52-good-badge">✓ ±10%</span>':''}</strong>
+     <small>${fmt(x.k)} kcal · P ${fmt(x.p)} g · L ${fmt(x.f)} g · HC ${fmt(x.c)} g · CHO ${fmt(x.cho,1)} · ${x.q} equivalentes</small>
+     <small class="v52-devline">Diferencia relativa: ${altDeviations(x)} · máx. ${fmt(sc.max*100,1)}%</small></div>
      <button data-alt="${i}">${applied?"Aplicada":"Aplicar"}</button>
    </div>`}).join("");
  window.__v5alts=list;
  document.querySelectorAll("[data-alt]").forEach(b=>b.onclick=()=>{
-   let x=window.__v5alts[+b.dataset.alt];
-   const previousQs=rows.map(r=>r.q);
+   const x=window.__v5alts[+b.dataset.alt],previousQs=rows.map(r=>r.q);
    x.qs.forEach((q,i)=>rows[i].q=q);
    render();
    flashOptimizedRows(previousQs,x.qs);
@@ -88,9 +208,44 @@ function renderAlternatives(list,autoApplied=false){
    if(card){card.classList.add("v51-alt-applied");b.textContent="Aplicada";}
  });
 }
-function openProfile(){ $("v5ProfileName").value=profile.name;$("v5ProfileSex").value=profile.sex;$("v5ProfileAge").value=profile.age;$("v5ProfileGoal").value=profile.goal;$("v5TargetProtein").value=profile.macro.p;$("v5TargetFat").value=profile.macro.f;$("v5TargetCarbs").value=profile.macro.c;$("v5ProfileModal").hidden=false}
+function openProfile(){
+ $("v5ProfileName").value=profile.name;
+ $("v5ProfileSex").value=profile.sex;
+ $("v5ProfileAge").value=profile.age;
+ $("v5ProfileGoal").value=profile.goal;
+ $("v5TargetProtein").value=profile.target.p;
+ $("v5TargetFat").value=profile.target.f;
+ $("v5TargetCarbs").value=profile.target.c;
+ $("v5TargetCho").value=profile.target.cho;
+ $("v5ProfileModal").hidden=false;
+}
 function closeProfile(){$("v5ProfileModal").hidden=true}
-$("v5EditProfile").onclick=openProfile;$("v5ProfileClose").onclick=closeProfile;document.querySelectorAll("[data-close-v5-profile]").forEach(x=>x.onclick=closeProfile);$("v5SaveProfile").onclick=()=>{let p=+$("v5TargetProtein").value,f=+$("v5TargetFat").value,c=+$("v5TargetCarbs").value,sum=p+f+c;if(Math.abs(sum-100)>0.01){$("v5ProfileWarning").hidden=false;$("v5ProfileWarning").textContent=`Los porcentajes de macronutrimentos deben sumar 100%. Actualmente suman ${sum}%.`;return}$("v5ProfileWarning").hidden=true;profile={...profile,name:$("v5ProfileName").value.trim()||"General",sex:$("v5ProfileSex").value,age:Math.round(+$("v5ProfileAge").value||50),goal:Math.round(+$("v5ProfileGoal").value||1800),macro:{p,f,c}};localStorage.setItem("miniSmaeV5Profile",JSON.stringify(profile));closeProfile();render();$("v5Alternatives").innerHTML='<p class="muted">El perfil cambió. Ejecuta nuevamente la optimización.</p>'};
+$("v5EditProfile").onclick=openProfile;
+$("v5ProfileClose").onclick=closeProfile;
+document.querySelectorAll("[data-close-v5-profile]").forEach(x=>x.onclick=closeProfile);
+$("v5SaveProfile").onclick=()=>{
+ const goal=Number($("v5ProfileGoal").value),p=Number($("v5TargetProtein").value),
+       f=Number($("v5TargetFat").value),c=Number($("v5TargetCarbs").value),
+       cho=Number($("v5TargetCho").value);
+ if([goal,p,f,c,cho].some(v=>!Number.isFinite(v)||v<0)||goal<=0){
+   $("v5ProfileWarning").hidden=false;
+   $("v5ProfileWarning").textContent="Los valores objetivo deben ser números válidos y no negativos; la energía debe ser mayor que cero.";
+   return;
+ }
+ $("v5ProfileWarning").hidden=true;
+ profile={
+   ...profile,
+   name:$("v5ProfileName").value.trim()||"General",
+   sex:$("v5ProfileSex").value,
+   age:Math.round(+$("v5ProfileAge").value||50),
+   goal:Math.round(goal),
+   target:{p,f,c,cho}
+ };
+ delete profile.macro;
+ localStorage.setItem("miniSmaeV5Profile",JSON.stringify(profile));
+ closeProfile();render();
+ $("v5Alternatives").innerHTML='<p class="muted">El perfil cambió. Ejecuta nuevamente la optimización.</p>';
+};
 $("v5Optimize").onclick=optimize;$("v5Reset").onclick=()=>{defaults.forEach((d,i)=>Object.assign(rows[i],JSON.parse(JSON.stringify(d))));render();$("v5Alternatives").innerHTML='<p class="muted">Valores reiniciados a la tabla base.</p>'};
 render();
 })();
