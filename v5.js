@@ -2,7 +2,7 @@
 "use strict";
 const $=id=>document.getElementById(id);
 const rows=[
- {g:"Verduras",s:"",min:0,max:5,q:0,k:50,p:4,f:0,c:8,cho:.6,e:"🥦"},
+ {g:"Verduras",s:"",min:0,max:5,q:0,k:25,p:2,f:0,c:4,cho:.3,e:"🥦"},
  {g:"Frutas",s:"",min:0,max:6,q:0,k:60,p:0,f:0,c:15,cho:1,e:"🍎"},
  {g:"Cereales y tubérculos",s:"a. Sin grasa",min:0,max:7,q:0,k:70,p:2,f:0,c:15,cho:1,e:"🌽"},
  {g:"Cereales y tubérculos",s:"b. Con grasa",min:0,max:8,q:0,k:115,p:2,f:5,c:15,cho:1,e:"🍞"},
