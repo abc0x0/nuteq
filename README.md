@@ -129,3 +129,16 @@ Cambios principales:
 - La optimización se ordena exclusivamente por cercanía relativa al perfil completo.
 - Un resultado se considera bueno cuando todas las referencias quedan dentro de ±10%.
 - La mejor alternativa se aplica automáticamente y se conservan hasta tres alternativas adicionales.
+
+
+## Mini SMAE v5.3
+
+Cambios en «Tabla base»:
+
+- Los perfiles editados se guardan localmente y pueden recuperarse desde una lista compacta de una sola línea por perfil.
+- «Referencias del perfil» aparece inmediatamente después de «Perfil objetivo».
+- En «Resumen actual», los valores fuera del margen ±10% se resaltan en rojo.
+- Se eliminaron de la vista las columnas Mínimo y Máximo.
+- Las cantidades se inicializan y reinician en 0.
+- Al optimizar se muestra «Procesando...» y un indicador animado antes de presentar las alternativas.
+- La tabla se hizo más compacta para mejorar la visualización en teléfono vertical.

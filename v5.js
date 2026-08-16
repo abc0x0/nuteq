@@ -2,25 +2,25 @@
 "use strict";
 const $=id=>document.getElementById(id);
 const rows=[
- {g:"Verduras",s:"",min:1,max:5,q:2,k:50,p:4,f:0,c:8,cho:.6,e:"🥦"},
- {g:"Frutas",s:"",min:1,max:6,q:1,k:60,p:0,f:0,c:15,cho:1,e:"🍎"},
- {g:"Cereales y tubérculos",s:"a. Sin grasa",min:1,max:7,q:1,k:70,p:2,f:0,c:15,cho:1,e:"🌽"},
- {g:"Cereales y tubérculos",s:"b. Con grasa",min:1,max:8,q:1,k:115,p:2,f:5,c:15,cho:1,e:"🍞"},
- {g:"Leguminosas",s:"",min:1,max:9,q:1,k:120,p:8,f:1,c:20,cho:1.3,e:"🫘"},
- {g:"Alimentos de origen animal",s:"a. Muy bajo aporte de grasa",min:1,max:10,q:1,k:40,p:7,f:1,c:0,cho:0,e:"🐟"},
- {g:"Alimentos de origen animal",s:"b. Bajo aporte de grasa",min:1,max:11,q:1,k:55,p:7,f:3,c:0,cho:0,e:"🍗"},
- {g:"Alimentos de origen animal",s:"c. Moderado aporte de grasa",min:1,max:12,q:1,k:75,p:7,f:5,c:0,cho:0,e:"🥚"},
- {g:"Alimentos de origen animal",s:"d. Alto aporte de grasa",min:1,max:13,q:1,k:100,p:7,f:8,c:0,cho:0,e:"🧀"},
- {g:"Leche",s:"a. Descremada",min:1,max:14,q:1,k:95,p:9,f:2,c:12,cho:.8,e:"🥛"},
- {g:"Leche",s:"b. Semidescremada",min:1,max:15,q:1,k:110,p:9,f:4,c:12,cho:.8,e:"🥛"},
- {g:"Leche",s:"c. Entera",min:1,max:16,q:1,k:150,p:9,f:8,c:12,cho:.8,e:"🥛"},
- {g:"Leche",s:"d. Con azúcar",min:1,max:17,q:1,k:200,p:8,f:5,c:30,cho:2,e:"🥤"},
- {g:"Aceites y Grasas",s:"a. Sin proteína",min:1,max:18,q:1,k:45,p:0,f:5,c:0,cho:0,e:"🥑"},
- {g:"Aceites y Grasas",s:"b. Con proteína",min:1,max:19,q:1,k:70,p:3,f:5,c:3,cho:.2,e:"🥜"},
- {g:"Azúcares",s:"a. Sin grasa",min:1,max:20,q:1,k:40,p:0,f:0,c:10,cho:.7,e:"🍬"},
- {g:"Azúcares",s:"b. Con grasa",min:1,max:21,q:1,k:85,p:0,f:5,c:10,cho:.7,e:"🍪"},
- {g:"Alimentos libres en energía",s:"",min:1,max:22,q:1,k:0,p:0,f:0,c:0,cho:0,e:"🌿"},
- {g:"Bebidas alcohólicas",s:"",min:1,max:23,q:1,k:140,p:0,f:0,c:20,cho:1.3,e:"🍺"}
+ {g:"Verduras",s:"",min:0,max:5,q:0,k:50,p:4,f:0,c:8,cho:.6,e:"🥦"},
+ {g:"Frutas",s:"",min:0,max:6,q:0,k:60,p:0,f:0,c:15,cho:1,e:"🍎"},
+ {g:"Cereales y tubérculos",s:"a. Sin grasa",min:0,max:7,q:0,k:70,p:2,f:0,c:15,cho:1,e:"🌽"},
+ {g:"Cereales y tubérculos",s:"b. Con grasa",min:0,max:8,q:0,k:115,p:2,f:5,c:15,cho:1,e:"🍞"},
+ {g:"Leguminosas",s:"",min:0,max:9,q:0,k:120,p:8,f:1,c:20,cho:1.3,e:"🫘"},
+ {g:"Alimentos de origen animal",s:"a. Muy bajo aporte de grasa",min:0,max:10,q:0,k:40,p:7,f:1,c:0,cho:0,e:"🐟"},
+ {g:"Alimentos de origen animal",s:"b. Bajo aporte de grasa",min:0,max:11,q:0,k:55,p:7,f:3,c:0,cho:0,e:"🍗"},
+ {g:"Alimentos de origen animal",s:"c. Moderado aporte de grasa",min:0,max:12,q:0,k:75,p:7,f:5,c:0,cho:0,e:"🥚"},
+ {g:"Alimentos de origen animal",s:"d. Alto aporte de grasa",min:0,max:13,q:0,k:100,p:7,f:8,c:0,cho:0,e:"🧀"},
+ {g:"Leche",s:"a. Descremada",min:0,max:14,q:0,k:95,p:9,f:2,c:12,cho:.8,e:"🥛"},
+ {g:"Leche",s:"b. Semidescremada",min:0,max:15,q:0,k:110,p:9,f:4,c:12,cho:.8,e:"🥛"},
+ {g:"Leche",s:"c. Entera",min:0,max:16,q:0,k:150,p:9,f:8,c:12,cho:.8,e:"🥛"},
+ {g:"Leche",s:"d. Con azúcar",min:0,max:17,q:0,k:200,p:8,f:5,c:30,cho:2,e:"🥤"},
+ {g:"Aceites y Grasas",s:"a. Sin proteína",min:0,max:18,q:0,k:45,p:0,f:5,c:0,cho:0,e:"🥑"},
+ {g:"Aceites y Grasas",s:"b. Con proteína",min:0,max:19,q:0,k:70,p:3,f:5,c:3,cho:.2,e:"🥜"},
+ {g:"Azúcares",s:"a. Sin grasa",min:0,max:20,q:0,k:40,p:0,f:0,c:10,cho:.7,e:"🍬"},
+ {g:"Azúcares",s:"b. Con grasa",min:0,max:21,q:0,k:85,p:0,f:5,c:10,cho:.7,e:"🍪"},
+ {g:"Alimentos libres en energía",s:"",min:0,max:22,q:0,k:0,p:0,f:0,c:0,cho:0,e:"🌿"},
+ {g:"Bebidas alcohólicas",s:"",min:0,max:23,q:0,k:140,p:0,f:0,c:20,cho:1.3,e:"🍺"}
 ];
 const defaults=JSON.parse(JSON.stringify(rows));
 let profile={
@@ -47,7 +47,50 @@ if(saved){
    }
  }catch(_){}
 }
-const savedRows=localStorage.getItem("miniSmaeV5Table"); if(savedRows){try{const a=JSON.parse(savedRows);a.forEach((x,i)=>{if(rows[i])Object.assign(rows[i],x)})}catch(_){}}
+const savedRows=localStorage.getItem("miniSmaeV53Table"); if(savedRows){try{const a=JSON.parse(savedRows);a.forEach((x,i)=>{if(rows[i])Object.assign(rows[i],x)})}catch(_){}}
+
+let savedProfiles=[];
+try{savedProfiles=JSON.parse(localStorage.getItem("miniSmaeV53Profiles")||"[]")}catch(_){savedProfiles=[]}
+if(!Array.isArray(savedProfiles))savedProfiles=[];
+function normalizeProfile(p){
+ return {
+   name:String(p?.name||"General"),
+   sex:String(p?.sex||"Hombre"),
+   age:Math.round(Number(p?.age)||50),
+   condition:String(p?.condition||"Sin condición clínica"),
+   goal:Number(p?.goal)||1800,
+   target:{
+     p:Number(p?.target?.p)||0,
+     f:Number(p?.target?.f)||0,
+     c:Number(p?.target?.c)||0,
+     cho:Number(p?.target?.cho)||0
+   }
+ };
+}
+function persistProfiles(){localStorage.setItem("miniSmaeV53Profiles",JSON.stringify(savedProfiles))}
+function saveProfileToList(p){
+ const n=normalizeProfile(p);
+ const idx=savedProfiles.findIndex(x=>String(x.name).toLocaleLowerCase("es-MX")===n.name.toLocaleLowerCase("es-MX"));
+ if(idx>=0)savedProfiles[idx]=n; else savedProfiles.unshift(n);
+ savedProfiles=savedProfiles.slice(0,20);
+ persistProfiles();
+}
+if(!savedProfiles.length){saveProfileToList(profile)}
+function compactProfileText(p){
+ const s=p.sex==="Hombre"?"H":p.sex==="Mujer"?"M":"—";
+ return `${p.name} · ${s} · ${p.age} a · ${fmt(p.goal)} kcal · P${fmt(p.target.p,1)} · L${fmt(p.target.f,1)} · HC${fmt(p.target.c,1)} · CHO${fmt(p.target.cho,1)}`;
+}
+function renderSavedProfiles(){
+ const host=$("v5SavedProfiles");
+ if(!host)return;
+ host.innerHTML=savedProfiles.map((p,i)=>`<button type="button" class="v53-saved-profile" data-profile-i="${i}" title="Recuperar ${p.name}">${compactProfileText(p)}</button>`).join("");
+ host.querySelectorAll("[data-profile-i]").forEach(btn=>btn.onclick=()=>{
+   profile=normalizeProfile(savedProfiles[+btn.dataset.profileI]);
+   localStorage.setItem("miniSmaeV5Profile",JSON.stringify(profile));
+   render();
+   $("v5Alternatives").innerHTML='<p class="muted">Perfil recuperado. Ejecuta la optimización para generar nuevas alternativas.</p>';
+ });
+}
 function fmt(x,d=0){return Number(x).toLocaleString("es-MX",{maximumFractionDigits:d})}
 function totals(qs=rows.map(r=>r.q)){return rows.reduce((a,r,i)=>{let q=qs[i];a.q+=q;a.k+=q*r.k;a.p+=q*r.p;a.f+=q*r.f;a.c+=q*r.c;a.cho+=q*r.cho;return a},{q:0,k:0,p:0,f:0,c:0,cho:0})}
 function targetObj(){return {k:Number(profile.goal)||0,p:Number(profile.target.p)||0,f:Number(profile.target.f)||0,c:Number(profile.target.c)||0,cho:Number(profile.target.cho)||0}}
@@ -87,17 +130,23 @@ function profileRender(){
    ["🌾 Hidratos",z.c,"g"],["🔢 Conteo HC",z.cho,""]
  ];
  $("v5MacroTarget").innerHTML=items.map(x=>`<div class="v52-target-value"><span>${x[0]}</span><b>${fmt(x[1],x[0].includes("Conteo")?1:0)} ${x[2]}</b></div>`).join("");
+ renderSavedProfiles();
 }
 function render(){
  profileRender();
  let b=$("v5TableBody");
- b.innerHTML=rows.map((r,i)=>`<tr data-i="${i}"><td><span class="v5-group-emoji">${r.e}</span><strong>${r.g}</strong></td><td>${r.s||"—"}</td><td><input class="v5-limit v5-min" data-i="${i}" type="number" min="0" max="99" step="1" value="${r.min}"></td><td><input class="v5-limit v5-max" data-i="${i}" type="number" min="0" max="99" step="1" value="${r.max}"></td><td><div class="v5-qty"><button data-act="minus" data-i="${i}">−</button><input class="v5-q" data-i="${i}" type="number" step="1" value="${r.q}"><button data-act="plus" data-i="${i}">+</button></div></td><td>${fmt(r.q*r.k)}</td><td>${fmt(r.q*r.p)}</td><td>${fmt(r.q*r.f)}</td><td>${fmt(r.q*r.c)}</td><td>${fmt(r.q*r.cho,1)}</td></tr>`).join("");
+ b.innerHTML=rows.map((r,i)=>`<tr data-i="${i}">
+   <td><span class="v5-group-emoji">${r.e}</span><strong>${r.g}</strong></td>
+   <td>${r.s||"—"}</td>
+   <td><div class="v5-qty"><button data-act="minus" data-i="${i}">−</button><input class="v5-q" data-i="${i}" type="number" min="0" step="1" value="${r.q}"><button data-act="plus" data-i="${i}">+</button></div></td>
+   <td>${fmt(r.q*r.k)}</td><td>${fmt(r.q*r.p)}</td><td>${fmt(r.q*r.f)}</td><td>${fmt(r.q*r.c)}</td><td>${fmt(r.q*r.cho,1)}</td>
+ </tr>`).join("");
  const t=totals(),z=targetObj(),s=profileScore(t);
  const dk=t.k-z.k,dp=t.p-z.p,df=t.f-z.f,dc=t.c-z.c,dcho=t.cho-z.cho;
  $("v5TableFoot").innerHTML=`
- <tr><td colspan="4">TOTAL</td><td>${t.q}</td><td>${fmt(t.k)}</td><td>${fmt(t.p)}</td><td>${fmt(t.f)}</td><td>${fmt(t.c)}</td><td>${fmt(t.cho,1)}</td></tr>
- <tr class="v5-ideal"><td colspan="4">IDEAL (Objetivo)</td><td>—</td><td>${fmt(z.k)}</td><td>${fmt(z.p,1)}</td><td>${fmt(z.f,1)}</td><td>${fmt(z.c,1)}</td><td>${fmt(z.cho,1)}</td></tr>
- <tr class="v5-difference"><td colspan="4">DIFERENCIA</td><td>—</td>
+ <tr><td colspan="2">TOTAL</td><td>${t.q}</td><td>${fmt(t.k)}</td><td>${fmt(t.p)}</td><td>${fmt(t.f)}</td><td>${fmt(t.c)}</td><td>${fmt(t.cho,1)}</td></tr>
+ <tr class="v5-ideal"><td colspan="2">IDEAL (Objetivo)</td><td>—</td><td>${fmt(z.k)}</td><td>${fmt(z.p,1)}</td><td>${fmt(z.f,1)}</td><td>${fmt(z.c,1)}</td><td>${fmt(z.cho,1)}</td></tr>
+ <tr class="v5-difference"><td colspan="2">DIFERENCIA</td><td>—</td>
  <td class="${diffClass(t.k,z.k)}">${signed(dk)}</td>
  <td class="${diffClass(t.p,z.p)}">${signed(dp,1)}</td>
  <td class="${diffClass(t.f,z.f)}">${signed(df,1)}</td>
@@ -113,11 +162,31 @@ function render(){
  $("v5Diff").textContent=s.outside===0
    ?"✓ Perfil dentro de ±10% en todas las referencias"
    :`${s.outside} de 5 referencias fuera del margen ±10%`;
+
+ // Las referencias actuales fuera del margen de tolerancia se muestran en rojo.
+ $("v5TotalKcal").classList.toggle("v53-summary-out",relDev(t.k,z.k)>.10+1e-9);
+ [["v53ProteinRef",t.p,z.p],["v53FatRef",t.f,z.f],["v53CarbsRef",t.c,z.c],["v53ChoRef",t.cho,z.cho]]
+   .forEach(([id,a,target])=>$(id)?.classList.toggle("v53-summary-out",relDev(a,target)>.10+1e-9));
+
  bindTable();
- localStorage.setItem("miniSmaeV5Table",JSON.stringify(rows.map(r=>({min:r.min,max:r.max,q:r.q}))));
+ localStorage.setItem("miniSmaeV53Table",JSON.stringify(rows.map(r=>({q:r.q}))));
 }
-function clamp(i,v){const r=rows[i];return Math.max(r.min,Math.min(r.max,Math.round(Number(v)||0)))}
-function bindTable(){document.querySelectorAll("#v5TableBody button[data-act]").forEach(b=>b.onclick=()=>{let i=+b.dataset.i;rows[i].q=clamp(i,rows[i].q+(b.dataset.act==="plus"?1:-1));render()});document.querySelectorAll(".v5-q").forEach(x=>x.onchange=()=>{let i=+x.dataset.i;rows[i].q=clamp(i,x.value);render()});document.querySelectorAll(".v5-min").forEach(x=>x.onchange=()=>{let i=+x.dataset.i;rows[i].min=Math.max(0,Math.round(+x.value||0));if(rows[i].max<rows[i].min)rows[i].max=rows[i].min;rows[i].q=clamp(i,rows[i].q);render()});document.querySelectorAll(".v5-max").forEach(x=>x.onchange=()=>{let i=+x.dataset.i;rows[i].max=Math.max(rows[i].min,Math.round(+x.value||0));rows[i].q=clamp(i,rows[i].q);render()})}
+function clamp(i,v){
+ const r=rows[i];
+ return Math.max(0,Math.min(r.max,Math.round(Number(v)||0)));
+}
+function bindTable(){
+ document.querySelectorAll("#v5TableBody button[data-act]").forEach(b=>b.onclick=()=>{
+   let i=+b.dataset.i;
+   rows[i].q=clamp(i,rows[i].q+(b.dataset.act==="plus"?1:-1));
+   render();
+ });
+ document.querySelectorAll(".v5-q").forEach(x=>x.onchange=()=>{
+   let i=+x.dataset.i;
+   rows[i].q=clamp(i,x.value);
+   render();
+ });
+}
 function stateTotals(qs){return totals(qs)}
 function flashOptimizedRows(previousQs,newQs){
  const changed=[];
@@ -243,9 +312,29 @@ $("v5SaveProfile").onclick=()=>{
  };
  delete profile.macro;
  localStorage.setItem("miniSmaeV5Profile",JSON.stringify(profile));
+ saveProfileToList(profile);
  closeProfile();render();
  $("v5Alternatives").innerHTML='<p class="muted">El perfil cambió. Ejecuta nuevamente la optimización.</p>';
 };
-$("v5Optimize").onclick=optimize;$("v5Reset").onclick=()=>{defaults.forEach((d,i)=>Object.assign(rows[i],JSON.parse(JSON.stringify(d))));render();$("v5Alternatives").innerHTML='<p class="muted">Valores reiniciados a la tabla base.</p>'};
+$("v5Optimize").onclick=()=>{
+ const btn=$("v5Optimize");
+ btn.disabled=true;
+ btn.dataset.oldText=btn.textContent;
+ btn.textContent="⏳ Procesando...";
+ $("v5Alternatives").innerHTML='<div class="v53-processing"><span class="v53-spinner" aria-hidden="true"></span><strong>Procesando...</strong><small>Buscando las combinaciones más cercanas al perfil objetivo.</small></div>';
+ // Se difiere el cálculo para permitir que el navegador pinte el estado "Procesando..."
+ setTimeout(()=>{
+   try{optimize()}
+   finally{
+     btn.disabled=false;
+     btn.textContent=btn.dataset.oldText||"✨ Optimizar automáticamente";
+   }
+ },60);
+};
+$("v5Reset").onclick=()=>{
+ defaults.forEach((d,i)=>Object.assign(rows[i],JSON.parse(JSON.stringify(d))));
+ render();
+ $("v5Alternatives").innerHTML='<p class="muted">Cantidades reiniciadas a 0.</p>';
+};
 render();
 })();

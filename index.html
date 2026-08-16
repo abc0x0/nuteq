@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Mini SMAE v5.2 — Tabla base personalizada</title>
+  <title>Mini SMAE v5.3 — Tabla base personalizada</title>
   <meta name="description" content="Consulta local del SMAE: fichas, sustitutos, grupos, comparación, equivalentes y asistente de sustitución por reglas.">
   <link rel="stylesheet" href="style.css">
   <meta name="theme-color" content="#2d6b40">
@@ -139,7 +139,7 @@
       </div>
     </div>
 
-    <div class="v5-profile-grid">
+    <div class="v53-top-sections">
       <article class="card v5-profile-card">
         <div class="card-head"><div><p class="eyebrow">Perfil objetivo</p><h2 id="v5ProfileTitle">👤 General</h2></div><button id="v5EditProfile" class="v4-top-btn" type="button">⚙️ Editar perfil</button></div>
         <div class="v5-profile-fields">
@@ -148,14 +148,31 @@
           <div><span class="lab">Condición</span><strong id="v5Condition">Sin condición clínica</strong></div>
           <div><span class="lab">Objetivo</span><strong><span id="v5Goal">1800</span> kcal</strong></div>
         </div>
-        <p class="muted v5-small-note">Perfil general editable. No constituye una prescripción nutricional individual.</p>
+        <div class="v53-saved-wrap">
+          <span class="v53-saved-label">Perfiles guardados</span>
+          <div id="v5SavedProfiles" class="v53-saved-profiles" aria-label="Perfiles guardados"></div>
+        </div>
+        <p class="muted v5-small-note">Pulsa un perfil guardado para recuperarlo. El perfil General es editable y no constituye una prescripción nutricional individual.</p>
       </article>
+
+      <article class="card v53-reference-card">
+        <p class="eyebrow">Referencias del perfil</p>
+        <h2>Objetivos nutritivos</h2>
+        <div id="v5MacroTarget" class="v5-targets v53-reference-targets"></div>
+        <p class="muted v5-small-note">Un resultado se considera bueno cuando cada valor queda dentro de ±10% de su referencia.</p>
+      </article>
+
       <aside class="card v5-summary-card">
         <p class="eyebrow">Resumen actual</p>
         <div class="v5-energy-number"><strong id="v5TotalKcal">0</strong><span class="v52-goal-label">de <b id="v5Goal2">1800</b> kcal objetivo</span></div>
         <div class="v5-progress"><span id="v5ProgressBar"></span></div>
         <div class="v5-diff" id="v5Diff">—</div>
-        <div class="v5-macro-mini"><span>Proteína <b id="v5Protein">0 g</b></span><span>Lípidos <b id="v5Fat">0 g</b></span><span>Hidratos <b id="v5Carbs">0 g</b></span><span>Conteo HC <b id="v5Cho">0</b></span></div>
+        <div class="v5-macro-mini">
+          <span id="v53ProteinRef">Proteína <b id="v5Protein">0 g</b></span>
+          <span id="v53FatRef">Lípidos <b id="v5Fat">0 g</b></span>
+          <span id="v53CarbsRef">Hidratos <b id="v5Carbs">0 g</b></span>
+          <span id="v53ChoRef">Conteo HC <b id="v5Cho">0</b></span>
+        </div>
       </aside>
     </div>
 
@@ -163,16 +180,15 @@
       <div class="card-head v5-table-head"><div><p class="eyebrow">Modo manual</p><h2>Aporte nutrimental promedio</h2></div><div class="v5-actions"><button id="v5Reset" class="secondary v5-action-btn" type="button">↺ Reiniciar</button><button id="v5Optimize" class="primary v5-action-btn" type="button">✨ Optimizar automáticamente</button></div></div>
       <div class="v5-table-wrap">
         <table class="v5-table">
-          <thead><tr><th>Grupo</th><th>Subgrupo</th><th>Mín</th><th>Máx</th><th>Cantidad</th><th>Energía</th><th>Proteína</th><th>Lípidos</th><th>Hidratos</th><th>Conteo HC</th></tr></thead>
+          <thead><tr><th>Grupo</th><th>Subgrupo</th><th>Cantidad</th><th>Energía</th><th>Proteína</th><th>Lípidos</th><th>Hidratos</th><th>Conteo HC</th></tr></thead>
           <tbody id="v5TableBody"></tbody>
           <tfoot id="v5TableFoot"></tfoot>
         </table>
       </div>
     </article>
 
-    <div class="v5-bottom-grid">
+    <div class="v5-bottom-grid v53-alternatives-grid">
       <article class="card"><p class="eyebrow">Optimización por perfil</p><h2>Alternativas sugeridas</h2><div id="v5Alternatives" class="v5-alternatives"><p class="muted">Pulsa “Optimizar automáticamente” para generar alternativas.</p></div></article>
-      <article class="card"><p class="eyebrow">Referencias del perfil</p><h2>Objetivos nutritivos</h2><div id="v5MacroTarget" class="v5-targets"></div><p class="muted v5-small-note">Un resultado se marca como bueno cuando cada valor queda dentro de ±10% de su referencia.</p></article>
     </div>
   </section>
 
@@ -334,7 +350,7 @@
 </div>
 
 
-<footer>Mini SMAE v5.2 · HTML + CSS + JavaScript + JSON + localStorage · PWA local.</footer>
+<footer>Mini SMAE v5.3 · HTML + CSS + JavaScript + JSON + localStorage · PWA local.</footer>
 
 <script src="data/smae-data.js"></script>
 <script src="app.js"></script>
