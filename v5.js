@@ -55,7 +55,7 @@ if(!Array.isArray(savedProfiles))savedProfiles=[];
 function normalizeProfile(p){
  return {
    name:String(p?.name||"General"),
-   sex:String(p?.sex||"Hombre"),
+   sex:(p?.sex==="Mujer"?"Mujer":"Hombre"),
    age:Math.round(Number(p?.age)||50),
    condition:String(p?.condition||"Sin condición clínica"),
    goal:Number(p?.goal)||1800,
@@ -77,20 +77,39 @@ function saveProfileToList(p){
 }
 if(!savedProfiles.length){saveProfileToList(profile)}
 function compactProfileText(p){
- const s=p.sex==="Hombre"?"H":p.sex==="Mujer"?"M":"—";
- return `${p.name} · ${s} · ${p.age} a · ${fmt(p.goal)} kcal · P${fmt(p.target.p,1)} · L${fmt(p.target.f,1)} · HC${fmt(p.target.c,1)} · CHO${fmt(p.target.cho,1)}`;
+ const s=p.sex==="Hombre"?"H":"M";
+ const safeName=String(p.name||"General").trim().replace(/\s+/g,"_");
+ return `${safeName}_${s}_${p.age}a_${fmt(p.goal)}kcal_P${fmt(p.target.p,1)}_L${fmt(p.target.f,1)}_HC${fmt(p.target.c,1)}_CH${fmt(p.target.cho,1)}`;
 }
 function renderSavedProfiles(){
- const host=$("v5SavedProfiles");
+ const count=$("v54SavedCount");
+ if(count)count.textContent=`${savedProfiles.length} ${savedProfiles.length===1?"perfil":"perfiles"}`;
+ const host=$("v54SavedProfilesList");
  if(!host)return;
- host.innerHTML=savedProfiles.map((p,i)=>`<button type="button" class="v53-saved-profile" data-profile-i="${i}" title="Recuperar ${p.name}">${compactProfileText(p)}</button>`).join("");
+ if(!savedProfiles.length){
+   host.innerHTML='<p class="muted">No hay perfiles guardados.</p>';
+   return;
+ }
+ host.innerHTML=savedProfiles.map((raw,i)=>{
+   const p=normalizeProfile(raw);
+   return `<button type="button" class="v54-saved-row" data-profile-i="${i}">
+     <span class="v54-saved-index">${i+1}:</span>
+     <span class="v54-saved-text">${compactProfileText(p)}</span>
+   </button>`;
+ }).join("");
  host.querySelectorAll("[data-profile-i]").forEach(btn=>btn.onclick=()=>{
    profile=normalizeProfile(savedProfiles[+btn.dataset.profileI]);
    localStorage.setItem("miniSmaeV5Profile",JSON.stringify(profile));
+   closeSavedProfiles();
    render();
-   $("v5Alternatives").innerHTML='<p class="muted">Perfil recuperado. Ejecuta la optimización para generar nuevas alternativas.</p>';
+   $("v5Alternatives").innerHTML='<p class="muted">Perfil recuperado y aplicado. Ejecuta la optimización para generar nuevas alternativas.</p>';
  });
 }
+function openSavedProfiles(){
+ renderSavedProfiles();
+ $("v54SavedProfilesModal").hidden=false;
+}
+function closeSavedProfiles(){$("v54SavedProfilesModal").hidden=true}
 function fmt(x,d=0){return Number(x).toLocaleString("es-MX",{maximumFractionDigits:d})}
 function totals(qs=rows.map(r=>r.q)){return rows.reduce((a,r,i)=>{let q=qs[i];a.q+=q;a.k+=q*r.k;a.p+=q*r.p;a.f+=q*r.f;a.c+=q*r.c;a.cho+=q*r.cho;return a},{q:0,k:0,p:0,f:0,c:0,cho:0})}
 function targetObj(){return {k:Number(profile.goal)||0,p:Number(profile.target.p)||0,f:Number(profile.target.f)||0,c:Number(profile.target.c)||0,cho:Number(profile.target.cho)||0}}
@@ -277,6 +296,9 @@ function renderAlternatives(list,autoApplied=false){
    if(card){card.classList.add("v51-alt-applied");b.textContent="Aplicada";}
  });
 }
+$("v54OpenSavedProfiles").onclick=openSavedProfiles;
+$("v54SavedProfilesClose").onclick=closeSavedProfiles;
+document.querySelectorAll("[data-close-v54-saved]").forEach(x=>x.onclick=closeSavedProfiles);
 function openProfile(){
  $("v5ProfileName").value=profile.name;
  $("v5ProfileSex").value=profile.sex;

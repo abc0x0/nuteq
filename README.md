@@ -142,3 +142,14 @@ Cambios en «Tabla base»:
 - Las cantidades se inicializan y reinician en 0.
 - Al optimizar se muestra «Procesando...» y un indicador animado antes de presentar las alternativas.
 - La tabla se hizo más compacta para mejorar la visualización en teléfono vertical.
+
+
+## Mini SMAE v5.4
+
+Cambios en perfiles:
+
+- «Perfiles guardados» abre una ventana independiente.
+- Los perfiles se muestran verticalmente y en formato compacto, por ejemplo:
+  `General_M_32a_1500kcal_P186.7_L40_HC350_CH12.2`.
+- Al seleccionar un perfil se aplica inmediatamente como perfil objetivo.
+- En «Editar perfil», Sexo sólo permite «Hombre» o «Mujer».

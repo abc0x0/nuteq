@@ -1,7 +1,7 @@
 {
-  "name": "Mini SMAE v5.3",
-  "short_name": "Mini SMAE v5.3",
-  "description": "Mini SMAE v5.3: perfiles recuperables, tabla base simplificada y optimización con indicador de proceso.",
+  "name": "Mini SMAE v5.4",
+  "short_name": "Mini SMAE v5.4",
+  "description": "Mini SMAE v5.4: recuperación de perfiles mediante selector vertical.",
   "lang": "es-MX",
   "start_url": "./index.html",
   "scope": "./",

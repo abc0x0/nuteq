@@ -288,3 +288,54 @@ footer{text-align:center;color:var(--muted);border-top:1px solid var(--line);pad
   .v53-saved-profiles{width:100%}
   .v5-table{min-width:720px}
 }
+
+
+/* ===== Mini SMAE v5.4 ===== */
+.v54-saved-wrap{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:12px;
+  flex-wrap:wrap;
+}
+.v54-saved-count{font-size:11px}
+.v54-saved-modal{width:min(820px,100%)}
+.v54-saved-list{
+  display:grid;
+  gap:8px;
+  margin-top:14px;
+}
+.v54-saved-row{
+  width:100%;
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  align-items:center;
+  gap:8px;
+  text-align:left;
+  border:1px solid var(--line);
+  background:#fff;
+  border-radius:10px;
+  padding:10px 12px;
+  cursor:pointer;
+  color:var(--text);
+}
+.v54-saved-row:hover{
+  background:var(--green2);
+  border-color:#a8bfad;
+}
+.v54-saved-index{
+  color:var(--green);
+  font-weight:800;
+  font-variant-numeric:tabular-nums;
+}
+.v54-saved-text{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+  font-size:12px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+@media(max-width:560px){
+  .v54-saved-row{padding:9px 10px}
+  .v54-saved-text{font-size:11px}
+}
