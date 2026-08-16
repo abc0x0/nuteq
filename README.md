@@ -1,58 +1,78 @@
-# Mini SMAE v3 — Didáctica
+# Mini SMAE v4 — Comidas y trazabilidad
 
-Aplicación web local y estática basada en el JSON SMAE v7 validado.
+Aplicación web estática y local basada en el JSON validado SMAE v7.
 
 ## Tecnología
-
 - HTML
 - CSS
 - JavaScript
 - JSON
-- `localStorage` del navegador
+- localStorage del navegador
 
-No requiere compilación, instalación, backend, servidor de base de datos ni dependencias externas.
+No requiere compilación, paquetes, backend, servidor de base de datos ni conexión a Internet.
 
-## Funciones heredadas de v2
+## Novedades de la v4
 
-- búsqueda de alimentos y ficha nutrimental;
-- sustitutos del mismo `grupo_codigo`;
-- exploración por grupos/subgrupos;
-- comparación de dos alimentos;
-- calculadora de equivalentes;
-- asistente de sustitución basado en reglas.
+### 1. Mi comida
+Permite:
+- agregar alimentos por número de equivalentes;
+- modificar equivalentes;
+- calcular totales de energía, proteína, lípidos, hidratos de carbono, fibra y sodio;
+- ver distribución de equivalentes por grupo/subgrupo;
+- identificar el alimento con mayor aporte de proteína y sodio.
 
-## Novedades v3
+### 2. Sustitución dentro de la comida
+Cada alimento puede sustituirse por otro del mismo `grupo_codigo`.
+La sustitución conserva el número de equivalentes y registra:
+- alimento anterior;
+- alimento nuevo;
+- grupo;
+- cambio de energía;
+- cambio de sodio.
 
-### Favoritos e historial
+### 3. Guardar comidas
+Las comidas pueden guardarse y cargarse mediante `localStorage`.
+No se envían datos a Internet.
 
-Los favoritos y las últimas 20 consultas se guardan localmente con `localStorage`. No se envía información a ningún servidor.
+### 4. Reto didáctico de sustitución
+Permite tomar una comida como punto inicial y tratar de reducir el sodio sin modificar los equivalentes de cada grupo. La aplicación evalúa el resultado.
 
-### Asistente explicativo
+### 5. Correcciones y validación
+El botón global `ⓘ Correcciones y validación` abre un panel cuyo resumen comienza con:
 
-El agente basado en reglas conserva los objetivos de v2 y añade una explicación del proceso: primero restringe la búsqueda al mismo grupo/subgrupo SMAE y después ordena los candidatos según el objetivo elegido.
+**Base de Datos SMAE 4d, v7**
 
-### Modo estudiante
+El panel se genera a partir de la información contenida en el propio JSON y muestra:
+- correcciones confirmadas;
+- normalizaciones del selenio;
+- valores estimados;
+- advertencias activas;
+- metodología de validación.
 
-Genera automáticamente ejercicios a partir del JSON local:
+La información no está codificada como una lista fija: JavaScript recorre los objetos `correccion`, `estado`, y `validacion_semantica` del JSON.
 
-- identificar un alimento del mismo grupo/subgrupo;
-- elegir el alimento con mayor fibra entre varias opciones equivalentes;
-- elegir la porción de menor energía dentro de un grupo.
+## Ejecutar
+Descomprima el ZIP y abra:
 
-Incluye retroalimentación y marcador de aciertos.
+`index.html`
 
-## Ejecución
+La aplicación incluye `data/smae-data.js`, por lo que funciona también mediante `file://`.
 
-Abra `index.html` directamente con un navegador moderno. El archivo `data/smae-data.js` permite funcionar también mediante `file://`.
-
-Opcionalmente puede usar:
+Opcionalmente puede utilizar:
 
 ```bash
 python3 -m http.server 8000
 ```
 
-pero no es necesario.
+## Archivos
+- `index.html`
+- `style.css`
+- `app.js`
+- `v3.js`
+- `v4.js`
+- `README.md`
+- `data/SMAE-4ed-normalizado-validado-v7.json`
+- `data/smae-data.js`
 
 ## Nota
-
 Herramienta didáctica y de consulta. No sustituye valoración ni prescripción profesional.

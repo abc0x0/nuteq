@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Mini SMAE v3 — Didáctica</title>
+  <title>Mini SMAE v4 — Comidas y trazabilidad</title>
   <meta name="description" content="Consulta local del SMAE: fichas, sustitutos, grupos, comparación, equivalentes y asistente de sustitución por reglas.">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -11,9 +11,12 @@
 <header class="topbar">
   <div class="brand">
     <span class="brand-icon">🥗</span>
-    <div><h1>Mini SMAE <small>v3</small></h1><p>Consulta y aprendizaje local del SMAE</p></div>
+    <div><h1>Mini SMAE <small>v4</small></h1><p>Consulta, equivalentes, comidas y trazabilidad local</p></div>
   </div>
-  <span id="dataStatus" class="status">Cargando…</span>
+  <div class="v4-top-actions">
+      <button id="validationBtn" class="v4-top-btn" type="button">ⓘ Correcciones y validación</button>
+      <span id="dataStatus" class="status">Cargando…</span>
+    </div>
 </header>
 
 <nav class="tabs" aria-label="Funciones">
@@ -22,6 +25,7 @@
   <button class="tab" data-view="comparar">⚖️ Comparar</button>
   <button class="tab" data-view="equivalentes">🧮 Equivalentes</button>
   <button class="tab" data-view="asistente">💬 Asistente</button>
+  <button class="tab" data-view="comida">🥗 Mi comida</button>
   <button class="tab" data-view="favoritos">⭐ Favoritos</button>
   <button class="tab" data-view="estudiante">🎓 Estudiante</button>
 </nav>
@@ -121,6 +125,89 @@
     </div>
   </section>
 
+
+  <section id="view-comida" class="view">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Constructor local</p>
+        <h2>Mi comida</h2>
+        <p class="muted">Agrega alimentos por equivalentes, calcula el aporte total y sustituye alimentos conservando el grupo SMAE.</p>
+      </div>
+    </div>
+
+    <div class="v4-meal-toolbar card">
+      <div class="v4-meal-add">
+        <label for="mealFoodInput">Alimento</label>
+        <div class="search-wrap">
+          <input id="mealFoodInput" type="search" placeholder="Buscar alimento para agregar…" autocomplete="off">
+          <div id="mealSuggestions" class="suggestions" hidden></div>
+        </div>
+      </div>
+      <div>
+        <label for="mealEqCount">Equivalentes</label>
+        <input id="mealEqCount" type="number" min="0.25" step="0.25" value="1">
+      </div>
+      <button id="mealAddBtn" class="primary v4-inline-btn" type="button">+ Agregar</button>
+    </div>
+
+    <div class="v4-meal-grid">
+      <article class="card">
+        <div class="card-head">
+          <div>
+            <p class="eyebrow">Composición</p>
+            <h2>Alimentos seleccionados</h2>
+          </div>
+          <span id="mealItemCount" class="pill">0</span>
+        </div>
+        <div id="mealEmpty" class="empty compact"><p>Agrega alimentos para construir una comida.</p></div>
+        <div id="mealItems" class="v4-meal-items"></div>
+      </article>
+
+      <aside class="card">
+        <p class="eyebrow">Resumen</p>
+        <h2>Totales nutrimentales</h2>
+        <div id="mealTotals" class="nutrient-grid"></div>
+        <div id="mealGroups" class="v4-group-summary"></div>
+        <div id="mealAnalysis" class="summary-box">Agrega alimentos para obtener un análisis.</div>
+      </aside>
+    </div>
+
+    <div class="v4-meal-grid v4-lower-grid">
+      <article class="card">
+        <div class="card-head">
+          <div><p class="eyebrow">Persistencia local</p><h2>Guardar comida</h2></div>
+        </div>
+        <div class="v4-save-row">
+          <input id="mealName" type="text" placeholder="Nombre, ej. Desayuno habitual">
+          <button id="saveMealBtn" class="primary" type="button">Guardar</button>
+        </div>
+        <div id="savedMeals" class="list"></div>
+      </article>
+
+      <article class="card">
+        <div class="card-head">
+          <div><p class="eyebrow">Actividad didáctica</p><h2>Reto de sustitución</h2></div>
+        </div>
+        <p class="muted">Intenta reducir el sodio mediante sustituciones sin cambiar el número de equivalentes de cada grupo.</p>
+        <div class="v4-challenge-actions">
+          <button id="startChallengeBtn" class="secondary" type="button">Iniciar reto</button>
+          <button id="evaluateChallengeBtn" class="secondary" type="button" disabled>Evaluar reto</button>
+        </div>
+        <div id="challengeResult" class="result-box" hidden></div>
+      </article>
+    </div>
+
+    <article class="card v4-history-card">
+      <div class="card-head">
+        <div><p class="eyebrow">Trazabilidad de acciones</p><h2>Sustituciones realizadas</h2></div>
+        <button id="clearSubHistory" class="link-btn" type="button">Limpiar</button>
+      </div>
+      <div id="substitutionHistory" class="v4-sub-history">
+        <p class="muted">Todavía no se han realizado sustituciones.</p>
+      </div>
+    </article>
+  </section>
+
   <section id="view-favoritos" class="view">
     <div class="section-head"><div><p class="eyebrow">Datos locales</p><h2>Favoritos e historial</h2></div></div>
     <div class="grid-two">
@@ -142,10 +229,46 @@
 
 </main>
 
-<footer>Mini SMAE v3 · HTML + CSS + JavaScript + JSON + localStorage · Sin instalación.</footer>
+<div id="validationModal" class="v4-modal" hidden>
+  <div class="v4-modal-backdrop" data-close-validation></div>
+  <section class="v4-modal-panel" role="dialog" aria-modal="true" aria-labelledby="validationTitle">
+    <div class="v4-modal-head">
+      <div>
+        <p class="eyebrow">Transparencia de los datos</p>
+        <h2 id="validationTitle">Base de Datos SMAE 4d, v7</h2>
+      </div>
+      <button id="validationClose" class="v4-modal-close" type="button" aria-label="Cerrar">×</button>
+    </div>
+    <p>Esta aplicación utiliza una versión normalizada y validada del SMAE 4.ª edición. Las correcciones y estimaciones conservan el valor publicado para mantener trazabilidad.</p>
+    <div id="validationSummary" class="v4-validation-summary"></div>
+    <div class="v4-validation-tabs">
+      <button class="v4-val-tab active" data-val-view="correcciones">Correcciones confirmadas</button>
+      <button class="v4-val-tab" data-val-view="estimados">Valores estimados</button>
+      <button class="v4-val-tab" data-val-view="advertencias">Advertencias activas</button>
+      <button class="v4-val-tab" data-val-view="metodo">Metodología</button>
+    </div>
+    <div id="validationContent" class="v4-validation-content"></div>
+  </section>
+</div>
+
+<div id="substituteModal" class="v4-modal" hidden>
+  <div class="v4-modal-backdrop" data-close-substitute></div>
+  <section class="v4-modal-panel v4-sub-modal" role="dialog" aria-modal="true">
+    <div class="v4-modal-head">
+      <div><p class="eyebrow">Sustitución equivalente</p><h2 id="substituteTitle">Sustituir alimento</h2></div>
+      <button id="substituteClose" class="v4-modal-close" type="button" aria-label="Cerrar">×</button>
+    </div>
+    <p id="substituteHelp" class="muted"></p>
+    <div id="substituteOptions" class="v4-sub-options"></div>
+  </section>
+</div>
+
+
+<footer>Mini SMAE v4 · HTML + CSS + JavaScript + JSON + localStorage · Sin instalación.</footer>
 
 <script src="data/smae-data.js"></script>
 <script src="app.js"></script>
 <script src="v3.js"></script>
+<script src="v4.js"></script>
 </body>
 </html>
