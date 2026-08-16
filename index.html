@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Mini SMAE v2</title>
+  <title>Mini SMAE v3 — Didáctica</title>
   <meta name="description" content="Consulta local del SMAE: fichas, sustitutos, grupos, comparación, equivalentes y asistente de sustitución por reglas.">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -11,7 +11,7 @@
 <header class="topbar">
   <div class="brand">
     <span class="brand-icon">🥗</span>
-    <div><h1>Mini SMAE <small>v2</small></h1><p>Consulta local de alimentos equivalentes</p></div>
+    <div><h1>Mini SMAE <small>v3</small></h1><p>Consulta y aprendizaje local del SMAE</p></div>
   </div>
   <span id="dataStatus" class="status">Cargando…</span>
 </header>
@@ -22,6 +22,8 @@
   <button class="tab" data-view="comparar">⚖️ Comparar</button>
   <button class="tab" data-view="equivalentes">🧮 Equivalentes</button>
   <button class="tab" data-view="asistente">💬 Asistente</button>
+  <button class="tab" data-view="favoritos">⭐ Favoritos</button>
+  <button class="tab" data-view="estudiante">🎓 Estudiante</button>
 </nav>
 
 <main class="page">
@@ -46,7 +48,7 @@
       <article class="card">
         <div class="card-head">
           <div><span id="foodGroup" class="pill"></span><h2 id="foodName"></h2><p id="foodPortion" class="muted"></p></div>
-          <span id="estimatedBadge" class="warning-badge" hidden>Estimado</span>
+          <div class="v3-head-actions"><button id="favoriteBtn" class="v3-fav-btn" type="button" title="Agregar a favoritos">☆</button><span id="estimatedBadge" class="warning-badge" hidden>Estimado</span></div>
         </div>
         <div id="estimatedNotice" class="notice" hidden>
           <strong>Valor estimado.</strong> <span id="estimatedMessage"></span>
@@ -101,10 +103,10 @@
   </section>
 
   <section id="view-asistente" class="view">
-    <div class="section-head"><div><p class="eyebrow">Agente basado en reglas</p><h2>Asistente de sustitución</h2></div></div>
+    <div class="section-head"><div><p class="eyebrow">Agente basado en reglas</p><h2>Asistente explicativo de sustitución</h2></div></div>
     <div class="assistant-shell">
       <div id="chat" class="chat">
-        <div class="bubble bot">Hola. Elige un alimento y te ayudaré a encontrar sustitutos del mismo grupo SMAE según tu objetivo.</div>
+        <div class="bubble bot">Hola. Elige un alimento y te ayudaré a encontrar sustitutos del mismo grupo SMAE. En v3 también te explicaré el criterio utilizado.</div>
       </div>
       <div class="assistant-controls">
         <div class="search-wrap"><input id="assistantFoodInput" placeholder="¿Qué alimento quieres sustituir?" autocomplete="off"><div id="assistantSuggestions" class="suggestions" hidden></div></div>
@@ -118,11 +120,32 @@
       </div>
     </div>
   </section>
+
+  <section id="view-favoritos" class="view">
+    <div class="section-head"><div><p class="eyebrow">Datos locales</p><h2>Favoritos e historial</h2></div></div>
+    <div class="grid-two">
+      <div class="card"><div class="card-head"><h2>⭐ Favoritos</h2><button id="clearFavorites" class="link-btn">Vaciar</button></div><div id="favoritesList" class="list"></div><div id="favoritesEmpty" class="empty compact"><p>Aún no has guardado favoritos.</p></div></div>
+      <div class="card"><div class="card-head"><h2>🕘 Consultas recientes</h2><button id="clearHistory" class="link-btn">Vaciar</button></div><div id="historyList" class="list"></div><div id="historyEmpty" class="empty compact"><p>Aún no hay historial.</p></div></div>
+    </div>
+  </section>
+
+  <section id="view-estudiante" class="view">
+    <div class="section-head"><div><p class="eyebrow">Modo didáctico</p><h2>Práctica con el SMAE</h2></div></div>
+    <div class="card v3-student-card">
+      <div class="v3-student-top"><span id="questionType" class="pill">Pregunta</span><button id="newQuestion" class="secondary v3-small">Nueva pregunta</button></div>
+      <h2 id="questionText">Generando pregunta…</h2>
+      <div id="questionOptions" class="v3-quiz-options"></div>
+      <div id="questionFeedback" class="v3-quiz-feedback" hidden></div>
+      <div class="v3-score-row"><span>Aciertos: <strong id="scoreCorrect">0</strong></span><span>Intentos: <strong id="scoreTotal">0</strong></span></div>
+    </div>
+  </section>
+
 </main>
 
-<footer>Mini SMAE v2 · HTML + CSS + JavaScript + JSON · Sin instalación ni servidor de base de datos.</footer>
+<footer>Mini SMAE v3 · HTML + CSS + JavaScript + JSON + localStorage · Sin instalación.</footer>
 
 <script src="data/smae-data.js"></script>
 <script src="app.js"></script>
+<script src="v3.js"></script>
 </body>
 </html>
