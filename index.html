@@ -3,9 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Mini SMAE v4 — Comidas y trazabilidad</title>
+  <title>Mini SMAE v4.1 PWA — Comidas y trazabilidad</title>
   <meta name="description" content="Consulta local del SMAE: fichas, sustitutos, grupos, comparación, equivalentes y asistente de sustitución por reglas.">
   <link rel="stylesheet" href="style.css">
+  <meta name="theme-color" content="#2d6b40">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 </head>
 <body>
 <header class="topbar">
@@ -270,5 +273,15 @@
 <script src="app.js"></script>
 <script src="v3.js"></script>
 <script src="v4.js"></script>
+
+<script>
+if ("serviceWorker" in navigator && location.protocol !== "file:") {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js")
+      .catch(err => console.warn("No fue posible registrar el service worker:", err));
+  });
+}
+</script>
+
 </body>
 </html>

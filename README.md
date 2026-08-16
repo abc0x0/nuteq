@@ -76,3 +76,18 @@ python3 -m http.server 8000
 
 ## Nota
 Herramienta didáctica y de consulta. No sustituye valoración ni prescripción profesional.
+
+
+## Mini SMAE v4.1 PWA
+
+Esta distribución agrega soporte PWA sin modificar la base tecnológica.
+
+Se añadieron:
+- `manifest.webmanifest`;
+- `service-worker.js`;
+- iconos 192x192 y 512x512;
+- `apple-touch-icon.png`;
+- instrucciones de instalación en Android.
+
+Para que Android ofrezca la instalación como PWA, la carpeta debe publicarse mediante HTTPS.
+Una vez instalada y cargada inicialmente, puede funcionar sin conexión gracias al service worker.
