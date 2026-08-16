@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Mini aplicación local para consultar alimentos del SMAE y encontrar sustitutos equivalentes.">
+  <title>Mini SMAE</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">🥗</div>
+      <div>
+        <h1>Mini SMAE</h1>
+        <p>Consulta rápida de alimentos equivalentes</p>
+      </div>
+    </div>
+    <span id="dataStatus" class="status">Cargando datos…</span>
+  </header>
+
+  <main class="page">
+    <section class="hero" aria-labelledby="search-title">
+      <p class="eyebrow">Sistema Mexicano de Alimentos Equivalentes</p>
+      <h2 id="search-title">Busca un alimento</h2>
+      <p class="hero-copy">Consulta su ficha y encuentra alimentos del mismo grupo o subgrupo que pueden utilizarse como sustitutos equivalentes.</p>
+
+      <div class="search-box">
+        <label class="sr-only" for="foodSearch">Nombre del alimento</label>
+        <input id="foodSearch" type="search" autocomplete="off"
+               placeholder="Ej. manzana, tortilla, brócoli…" aria-controls="suggestions">
+        <button id="clearSearch" type="button" class="clear-btn" aria-label="Limpiar búsqueda">×</button>
+        <div id="suggestions" class="suggestions" role="listbox" hidden></div>
+      </div>
+      <p id="searchHelp" class="search-help">Escribe al menos 2 letras para ver sugerencias.</p>
+    </section>
+
+    <section id="emptyState" class="empty-state">
+      <div class="empty-icon" aria-hidden="true">🔎</div>
+      <h3>Empieza escribiendo el nombre de un alimento</h3>
+      <p>La búsqueda se realiza localmente en el archivo JSON incluido con esta aplicación.</p>
+    </section>
+
+    <section id="foodView" class="food-layout" hidden>
+      <article class="card food-card">
+        <div class="card-header">
+          <div>
+            <p id="foodGroup" class="group-pill"></p>
+            <h2 id="foodName"></h2>
+            <p id="foodPortion" class="portion"></p>
+          </div>
+          <span id="estimatedBadge" class="estimated-badge" hidden>Valor estimado</span>
+        </div>
+
+        <div id="estimatedNotice" class="notice" hidden>
+          <strong>Dato estimado.</strong>
+          <span id="estimatedMessage"></span>
+          <button id="toggleEstimateDetail" class="text-button" type="button">Ver detalle</button>
+          <div id="estimateDetail" class="estimate-detail" hidden></div>
+        </div>
+
+        <h3>Ficha nutrimental</h3>
+        <div id="nutrientGrid" class="nutrient-grid"></div>
+
+        <details class="source-details">
+          <summary>Fuente y validación</summary>
+          <dl id="sourceInfo"></dl>
+        </details>
+      </article>
+
+      <aside class="card substitutes-card">
+        <div class="substitutes-header">
+          <div>
+            <p class="eyebrow">Sustitución</p>
+            <h2>Alimentos equivalentes</h2>
+          </div>
+          <span id="substituteCount" class="count-badge"></span>
+        </div>
+        <p id="substituteIntro" class="muted"></p>
+        <div id="substitutes" class="substitutes-list"></div>
+        <button id="showMore" class="secondary-button" type="button" hidden>Ver más</button>
+      </aside>
+    </section>
+  </main>
+
+  <footer>
+    <p>Mini SMAE · Datos locales provenientes del JSON SMAE v7 validado.</p>
+  </footer>
+
+  <script src="data/smae-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
